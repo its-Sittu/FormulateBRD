@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+venv/
+server/venv/
+*.egg-info/
+dist/
+build/
+
+# Dataset (too large for GitHub)
+dataset/
+*.csv
+
+# Node
+node_modules/
+client/node_modules/
+dist/
+client/dist/
+
+# Duplicate logo in public (use src/assets instead)
+client/public/logo.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
