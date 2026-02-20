@@ -28,7 +28,8 @@ async def startup_event():
 
 # CORS configuration
 origins = [
-    "http://localhost:5173",  # React app
+    "http://localhost:5173",  # React app (Vite default)
+    "http://localhost:5174",  # React app (Vite alternate port)
     "http://localhost:3000",
 ]
 

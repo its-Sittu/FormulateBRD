@@ -21,7 +21,7 @@ import './index.css'
 
 // --- MOCK COMPONENTS FOR DASHBOARD ---
 
-const StatsCard = ({ title, value, sub, color }) => (
+const StatsCard = ({ title, value, sub, color, icon: Icon }) => (
   <div className={`stat-card ${color}`}>
     <div>
       <div className="stat-header">{title}</div>
@@ -29,7 +29,7 @@ const StatsCard = ({ title, value, sub, color }) => (
       <div className="stat-sub">{sub}</div>
     </div>
     <div className="stat-icon">
-      <IconComponent size={16} />
+      {Icon && <Icon size={16} />}
     </div>
   </div>
 )
@@ -400,12 +400,24 @@ function App() {
       {/* Sidebar */}
       <div className="sidebar">
         <div className="logo">
-          <div className="logo-icon" style={{background:'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', border:'none'}}>
-             <MessageSquareText size={20} color="white" />
+          {/* Brand Icon — Custom Logo */}
+          <img src="/logo.png" alt="FormulateBRD Logo" style={{
+            width:'42px', height:'42px', borderRadius:'12px', flexShrink:0,
+            boxShadow:'0 4px 20px rgba(139,92,246,0.5)'
+          }} />
+          {/* Brand Name */}
+          <div>
+            <div style={{fontWeight:'800', fontSize:'17px', letterSpacing:'-0.5px', lineHeight:'1.1'}}>
+              Formulate
+              <span style={{
+                background:'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'
+              }}>BRD</span>
+            </div>
+            <div style={{fontSize:'10px', color:'var(--text-muted)', letterSpacing:'0.4px', marginTop:'2px'}}>
+              AI-Powered Requirements
+            </div>
           </div>
-          <span style={{fontWeight:'700', fontSize:'18px', letterSpacing:'-0.5px'}}>
-             Formulate<span style={{color:'#3b82f6'}}>BRD</span>
-          </span>
         </div>
         
         <div className="nav-menu">
