@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import logoImg from './assets/logo.png'
 import ReactMarkdown from 'react-markdown'
 import { 
   LayoutDashboard, 
@@ -401,10 +402,19 @@ function App() {
       <div className="sidebar">
         <div className="logo">
           {/* Brand Icon — Custom Logo */}
-          <img src="/logo.png" alt="FormulateBRD Logo" style={{
-            width:'42px', height:'42px', borderRadius:'12px', flexShrink:0,
-            boxShadow:'0 4px 20px rgba(139,92,246,0.5)'
-          }} />
+          {/* Logo container with white background to contrast dark sidebar */}
+          <div style={{
+            width:'52px', height:'52px', borderRadius:'50%',
+            background:'white', flexShrink:0,
+            display:'flex', alignItems:'center', justifyContent:'center',
+            overflow:'hidden',
+            boxShadow:'0 2px 12px rgba(0,0,0,0.4)'
+          }}>
+            <img src={logoImg} alt="FormulateBRD Logo" style={{
+              width:'100%', height:'100%',
+              objectFit:'cover'
+            }} />
+          </div>
           {/* Brand Name */}
           <div>
             <div style={{fontWeight:'800', fontSize:'17px', letterSpacing:'-0.5px', lineHeight:'1.1'}}>
