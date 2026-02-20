@@ -21,7 +21,7 @@ import './index.css'
 
 // --- MOCK COMPONENTS FOR DASHBOARD ---
 
-const StatsCard = ({ title, value, sub, color, icon: IconComponent }) => (
+const StatsCard = ({ title, value, sub, color }) => (
   <div className={`stat-card ${color}`}>
     <div>
       <div className="stat-header">{title}</div>
