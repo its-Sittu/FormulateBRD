@@ -1,24 +1,39 @@
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
-import time
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+import google.generativeai as genai
+from prompts import MASTER_PIPELINE_PROMPT, ANALYSIS_SYSTEM_PROMPT, BRD_GENERATION_PROMPT, GAP_ANALYSIS_PROMPT
 
 app = FastAPI()
 
-# Enron Dataset (Loaded on Startup)
+# --- Gemini Setup ---
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY and GEMINI_API_KEY != "your_gemini_api_key_here":
+    genai.configure(api_key=GEMINI_API_KEY)
+    gemini_model = genai.GenerativeModel("gemini-1.5-flash")
+    USE_REAL_LLM = True
+    print("✅ Gemini API configured successfully.")
+else:
+    gemini_model = None
+    USE_REAL_LLM = False
+    print("⚠️  No Gemini API key found. Running in MOCK mode.")
+
+# --- Enron Dataset ---
 ENRON_DATASET = []
 from enron_loader import load_enron_sample
-
-import os
 
 @app.on_event("startup")
 async def startup_event():
     global ENRON_DATASET
     print("Loading Enron dataset sample...")
-    # Path to dataset (Relative to this script)
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     dataset_path = os.path.join(base_dir, "dataset", "emails.csv")
-    
     if os.path.exists(dataset_path):
         ENRON_DATASET = load_enron_sample(dataset_path, limit=5000)
         print(f"Loaded {len(ENRON_DATASET)} Enron emails.")
@@ -26,10 +41,10 @@ async def startup_event():
         print(f"Warning: Dataset not found at {dataset_path}")
         ENRON_DATASET = []
 
-# CORS configuration
+# --- CORS ---
 origins = [
-    "http://localhost:5173",  # React app (Vite default)
-    "http://localhost:5174",  # React app (Vite alternate port)
+    "http://localhost:5173",
+    "http://localhost:5174",
     "http://localhost:3000",
 ]
 
@@ -41,103 +56,127 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- Mock Data / Prompt Engineering Logic ---
+# --- LLM Service ---
 
-class MockLLMService:
-    def generate_full_report(self, text_input: str):
-        """Simulate a multi-stage LLM pipeline."""
-        time.sleep(1) # Stage 1 Analysis
-        
-        analysis = f"""# Requirement Analysis Report (Mock)
+def call_gemini(prompt: str) -> str:
+    """Call Gemini API and return the text response."""
+    response = gemini_model.generate_content(prompt)
+    return response.text
+
+def generate_with_real_llm(user_input: str) -> dict:
+    """3-stage Gemini pipeline: Analysis → BRD → Validation."""
+
+    # Stage 1: Requirement Analysis
+    print("Stage 1: Running Requirement Analysis...")
+    analysis_prompt = ANALYSIS_SYSTEM_PROMPT.format(user_input=user_input)
+    analysis = call_gemini(analysis_prompt)
+
+    # Stage 2: BRD Generation
+    print("Stage 2: Generating BRD...")
+    brd_prompt = BRD_GENERATION_PROMPT.format(analysis_output=analysis)
+    brd = call_gemini(brd_prompt)
+
+    # Stage 3: Validation & Gap Analysis
+    print("Stage 3: Running Validation...")
+    gap_prompt = GAP_ANALYSIS_PROMPT.format(brd_output=brd)
+    gaps = call_gemini(gap_prompt)
+
+    return {
+        "analysis": analysis,
+        "brd": brd,
+        "clarification_questions": gaps
+    }
+
+def generate_with_mock(text_input: str) -> dict:
+    """Fallback mock pipeline when no API key is set."""
+    import time
+    time.sleep(1)
+    analysis = f"""## Stage 1 — Requirement Analysis (Mock)
 
 1. Business Problem:
-   The user needs to process the following input: "{text_input[:50]}...".
+   The user needs to process: "{text_input[:80]}..."
 
-2. Business Goals:
-   *   Automate documentation.
-   *   Reduce manual analysis time.
+2. Business Objectives:
+   - Automate BRD generation
+   - Reduce manual documentation effort
 
-3. Target Users / Stakeholders:
-   *   Business Analysts
-   *   Product Owners
+3. Stakeholders / Users:
+   - Business Analysts
+   - Product Owners
 
-4. Key Functional Needs (explicit only):
-   *   Input ingestion
-   *   Multi-stage processing
-   *   Export to PDF (inferred)
+4. Explicit Functional Requirements:
+   - Input ingestion (text/files)
+   - Structured BRD output
 
-5. Constraints (explicit only):
-   *   Must be accurate.
+5. Explicit Constraints:
+   - Must be accurate and hallucination-free
 
 6. Missing or Unclear Information:
-   *   Timeline?
-   *   Budget?
+   - No timeline provided
+   - No budget constraints mentioned
 """
-        time.sleep(1) # Stage 2 BRD
-        
-        brd = f"""# Business Requirements Document
+    time.sleep(1)
+    brd = """## Business Requirements Document (Mock)
 
-## 1. Project Overview
-The "Auto-BRD" project aims to streamline the creation of requirement documents using AI agents.
+### 1. Project Overview
+AI-powered BRD generation system to convert unstructured business input into formal documentation.
 
-## 2. Business Objectives
-- Reduce time-to-draft by 50%.
-- Standardize output format.
+### 2. Business Objectives
+- Reduce time-to-draft by 50%
+- Standardize BRD output format
 
-## 3. Stakeholders
-- **Primary**: Business Analysts
-- **Secondary**: Developers (consumers of BRD)
+### 3. Stakeholders
+- **Primary**: Business Analysts, Product Owners
+- **Secondary**: Development Teams
 
-## 4. Functional Requirements
-- **FR1**: System MUST accept text and file inputs.
-- **FR2**: System MUST generate a structured BRD based on the analysis.
-- **FR3**: System MUST identify gaps in requirements.
+### 4. Functional Requirements
+- **FR1**: System MUST accept text and file inputs
+- **FR2**: System MUST generate structured BRD output
+- **FR3**: System MUST identify requirement gaps
 
-## 5. Non-Functional Requirements
-- **NFR1**: Response time < 5 seconds for draft generation.
-- **NFR2**: Data privacy compliant (GDPR).
+### 5. Non-Functional Requirements
+- **NFR1** *(Inferred)*: Response time < 10 seconds
+- **NFR2** *(Inferred)*: Data privacy compliant
 
-## 6. Assumptions & Constraints
-- **Assumption (Inferred)**: Users provide English input.
-- **Constraint**: Web-based interface only.
+### 6. Assumptions & Constraints
+- *(Assumption)*: Input is provided in English
+- *(Constraint)*: Web-based interface only
 
-## 7. Success Metrics
-- User adoption rate > 30% in first month.
+### 7. Success Metrics
+- BRD accuracy validated by Business Analyst
 """
+    gaps = """## Clarification Questions
 
-        time.sleep(1) # Stage 3 Gap Analysis
-        
-        gaps = f"""# Clarification Questions
-
-1.  **Timeline**: What is the expected delivery date for the MVP?
-2.  **Integration**: Are there specific 3rd-party tools (Jira, Confluence) we need to integrate with?
-3.  **Security**: Do we need specific compliance certifications (SOC2, HIPAA)?
+1. **Timeline**: What is the expected delivery date for the MVP?
+2. **Budget**: Are there budget constraints that affect scope?
+3. **Integrations**: Are there specific tools to integrate with (Jira, Confluence)?
+4. **Compliance**: Are there security/compliance requirements (GDPR, SOC2, HIPAA)?
 """
-        
-        return {
-            "analysis": analysis,
-            "brd": brd,
-            "clarification_questions": gaps
-        }
+    return {
+        "analysis": analysis,
+        "brd": brd,
+        "clarification_questions": gaps
+    }
 
-llm_service = MockLLMService()
+# --- API Endpoints ---
 
 @app.post("/ingest")
 async def ingest_data(files: List[UploadFile] = File(None), text: str = Form(...)):
-    """Ingest text and files (mock processing)."""
-    # In a real app, we would parse files here (PDF/Docx)
-    # For MVP, we just combine text and file names
+    """Ingest text and files."""
     combined_context = text
     if files:
-        file_names = ", ".join([f.filename for f in files])
-        combined_context += f"\n\n[Attached Files: {file_names}]"
-    
+        file_names = ", ".join([f.filename for f in files if f.filename])
+        if file_names:
+            combined_context += f"\n\n[Attached Files: {file_names}]"
     return {"message": "Data ingested successfully", "context_preview": combined_context[:100]}
 
 @app.post("/generate")
 async def generate_brd(context: str = Form(...)):
-    """Generate full BRD report from context."""
-    report = llm_service.generate_full_report(context)
+    """Generate full BRD report. Uses Gemini if API key is set, else mock."""
+    if USE_REAL_LLM:
+        report = generate_with_real_llm(context)
+    else:
+        report = generate_with_mock(context)
     return report
 
 @app.get("/enron/random")
@@ -146,15 +185,14 @@ async def get_random_enron_email():
     import random
     if not ENRON_DATASET:
         return {"error": "Dataset not loaded or empty"}
-    
-    email_data = random.choice(ENRON_DATASET)
-    return email_data
+    return random.choice(ENRON_DATASET)
 
 @app.post("/enron/generate-brd")
-async def generate_brd_from_email(email_context: str = Form(...)): # simplified for MVP
-    """Generate BRD specifically from an email context."""
+async def generate_brd_from_email(email_context: str = Form(...)):
+    """Generate BRD from an email context."""
     return await generate_brd(context=email_context)
 
 @app.get("/")
 def read_root():
-    return {"status": "Auto-BRD Generator API is running"}
+    mode = "Gemini AI" if USE_REAL_LLM else "Mock"
+    return {"status": "FormulateBRD API is running", "mode": mode}
