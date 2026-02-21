@@ -1,8 +1,8 @@
 # Stage 1: Build the React Frontend
-FROM node:18-alpine AS build-stage
+FROM node:18 AS build-stage
 WORKDIR /app/client
 COPY client/package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY client/ ./
 # Pass environment variable for build time
 ARG VITE_API_URL=""
