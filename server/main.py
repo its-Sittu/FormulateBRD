@@ -1,5 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from typing import List
 import os, time
 from datetime import datetime
@@ -262,7 +264,29 @@ def get_stats():
         "server_time": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
     }
 
+
+# --- Static File Serving (for production) ---
+# Mount the dist folder from the client build
+dist_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "client", "dist")
+
+if os.path.exists(dist_path):
+    app.mount("/assets", StaticFiles(directory=os.path.join(dist_path, "assets")), name="assets")
+
+@app.get("/{full_path:path}")
+async def serve_spa(full_path: str):
+    # If the file exists in dist, serve it (e.g. favicon.ico)
+    potential_file = os.path.join(dist_path, full_path)
+    if os.path.isfile(potential_file):
+        return FileResponse(potential_file)
+    
+    # Otherwise, serve index.html for SPA routing
+    index_file = os.path.join(dist_path, "index.html")
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
+    
+    # Fallback if dist isn't built yet
+    return {"status": "Backend Live", "message": "Frontend build not found. Visit API docs at /docs"}
+
 @app.get("/")
 def read_root():
-    mode = "Gemini AI" if USE_REAL_LLM else "Mock"
-    return {"status": "FormulateBRD API is running", "mode": mode}
+    return FileResponse(os.path.join(dist_path, "index.html")) if os.path.exists(os.path.join(dist_path, "index.html")) else {"status": "FormulateBRD API is running"}
