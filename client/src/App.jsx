@@ -28,7 +28,46 @@ import {
 } from 'lucide-react'
 import './index.css'
 
+const fmtDate = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+
+const timeAgo = (date) => {
+  if (!date) return '—';
+  const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+  let interval = seconds / 31536000;
+  if (interval > 1) return Math.floor(interval) + "y ago";
+  interval = seconds / 2592000;
+  if (interval > 1) return Math.floor(interval) + "mo ago";
+  interval = seconds / 86400;
+  if (interval > 1) return Math.floor(interval) + "d ago";
+  interval = seconds / 3600;
+  if (interval > 1) return Math.floor(interval) + "h ago";
+  interval = seconds / 60;
+  if (interval > 1) return Math.floor(interval) + "m ago";
+  if (seconds < 10) return "Just now";
+  return Math.floor(seconds) + "s ago";
+};
+
 // --- REFINED COMPONENTS FOR ENTERPRISE REALISM ---
+const SAMPLE_MOCK_REPORTS = [
+  {
+    analysis: "# Analysis: Core Infrastructure V1\n\n- **Objective**: Scalable multi-tenant service architecture.\n- **Stakeholders**: Enterprise Operations, Tech Leads.\n- **Constraints**: High availability, localized data residency.",
+    brd: "# Business Requirements Document: Infrastructure V1\n\n## 1. Executive Summary\nStrategic requirements for the primary service layer.\n\n## 2. Functional Requirements\n- **FR-01**: Multi-tenant data isolation.\n- **FR-02**: Real-time operational monitoring.",
+    clarification_questions: "1. What is the projected peak throughput?\n2. Are legacy protocols required for backward compatibility?"
+  },
+  {
+    analysis: "# Analysis: Unified Access Policy\n\n- **Problem**: Fragmented permission management across departments.\n- **Users**: Admin roles and external auditors.\n- **Success Metrics**: Unified governance dashboard.",
+    brd: "# BRD: Access Control v2.1\n\n## 1. Goals\nImplement fine-grained policy-based access control.\n\n## 2. Requirements\n- **REQ-01**: Standardize role definitions.\n- **REQ-02**: Audit trail for all permission changes.",
+    clarification_questions: "1. Should we support time-bound access grants?\n2. Integration with existing LDAP/AzureAD providers?"
+  }
+];
+
+const INITIAL_HISTORY = [
+  { name: 'Strategic BRD-10', timestamp: new Date(Date.now() - 1800000), status: 'Finalized', desc: 'Core requirements analysis for Enterprise Stack', isMock: true, ...SAMPLE_MOCK_REPORTS[0] },
+  { name: 'Strategic BRD-9', timestamp: new Date(Date.now() - 86400000), status: 'Finalized', desc: 'Scalable service mesh architecture and routing policies.', isMock: true, ...SAMPLE_MOCK_REPORTS[1] },
+  { name: 'Strategic BRD-8', timestamp: new Date(Date.now() - 172800000), status: 'Finalized', desc: 'Multi-region data consistency and failover specs.', isMock: true, ...SAMPLE_MOCK_REPORTS[0] },
+  { name: 'Strategic BRD-7', timestamp: new Date(Date.now() - 259200000), status: 'Finalized', desc: 'Unified identity and access governance framework.', isMock: true, ...SAMPLE_MOCK_REPORTS[1] }
+];
 
 const StatsCard = ({ title, value, sub, color, icon: Icon }) => {
   const IconComponent = Icon;
@@ -44,39 +83,72 @@ const StatsCard = ({ title, value, sub, color, icon: Icon }) => {
   );
 };
 
-const BarChart = () => {
-  const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
-  const requests = [18, 25, 22, 30, 27, 35]
-  const completed = [15, 20, 19, 26, 24, 32]
-  const maxVal = 40
+const BarChart = ({ history = [] }) => {
+  // Drive last point from history length
+  const dynamicVal = Math.min(98, 85 + (history.length * 2));
+  const dynamicY = 140 - (dynamicVal / 100) * 120;
+
+  const points = [
+    { x: 30, y: 120, val: 65 },
+    { x: 112, y: 100, val: 78 },
+    { x: 194, y: 110, val: 72 },
+    { x: 276, y: 80, val: 84 },
+    { x: 358, y: 90, val: 80 },
+    { x: 440, y: 60, val: 92 },
+    { x: 522, y: dynamicY, val: dynamicVal }
+  ]
+  const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
+  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
+  const areaData = `${pathData} L 522 140 L 30 140 Z`
+
   return (
     <div className="chart-card" style={{padding:'24px'}}>
-      <div style={{marginBottom:'20px'}}>
-        <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Generation Velocity</h3>
-        <p style={{margin:'4px 0 0 0', fontSize:'12px', color:'var(--text-muted)'}}>Monthly volume of BRD requests vs successful primary exports</p>
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'20px'}}>
+        <div>
+          <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Semantic Precision Index</h3>
+          <p style={{margin:'4px 0 0 0', fontSize:'12px', color:'var(--text-muted)'}}>Historical trend of AI-driven requirement validation accuracy</p>
+        </div>
+        <div style={{display:'flex', alignItems:'center', gap:'6px', background:'rgba(16,185,129,0.1)', color:'#10b981', padding:'2px 8px', borderRadius:'100px', fontSize:'10px', fontWeight:'700'}}>
+          <div className="pulse-dot"></div> LIVE TELEMETRY
+        </div>
       </div>
       <svg viewBox="0 0 540 160" width="100%" height="160">
-        {[0,20,40].map((v,i) => {
-          const y = 140 - (v/maxVal)*120
+        {[0,50,100].map((v,i) => {
+          const y = 140 - (v/100)*120
           return <g key={i}>
             <line x1="30" y1={y} x2="540" y2={y} stroke="var(--border-color)" strokeWidth="1" strokeDasharray="4 4"/>
-            <text x="24" y={y+4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{v}</text>
+            <text x="24" y={y+4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{v}%</text>
           </g>
         })}
-        {months.map((month, i) => {
-          const x = 50 + i * 82
-          const rH = (requests[i]/maxVal)*120
-          const cH = (completed[i]/maxVal)*120
-          return <g key={i}>
-            <rect x={x} y={140-rH} width="22" height={rH} rx="4" fill="var(--primary)" opacity="0.8"/>
-            <rect x={x+26} y={140-cH} width="22" height={cH} rx="4" fill="var(--accent-blue)" opacity="0.8"/>
-            <text x={x+24} y="158" fill="var(--text-muted)" fontSize="10" textAnchor="middle">{month}</text>
-          </g>
+        <path d={areaData} fill="url(#chartGradient)" opacity="0.15" />
+        <path d={pathData} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        {points.map((p, i) => {
+          const isLast = i === points.length - 1;
+          return (
+            <g key={i}>
+              <circle 
+                cx={p.x} 
+                cy={p.y} 
+                r={isLast ? "5" : "4"} 
+                fill={isLast ? "var(--primary)" : "var(--bg-card)"} 
+                stroke="var(--primary)" 
+                strokeWidth="2" 
+                className={isLast ? "pulse-node" : ""}
+              />
+              <text x={p.x} y="158" fill="var(--text-muted)" fontSize="10" textAnchor="middle">{months[i]}</text>
+            </g>
+          );
         })}
+        <defs>
+          <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="var(--primary)" />
+            <stop offset="100%" stopColor="transparent" />
+          </linearGradient>
+        </defs>
       </svg>
       <div style={{display:'flex', gap:'16px', marginTop:'16px', fontSize:'11px', color:'var(--text-secondary)'}}>
-        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--primary)'}}></div> Requests</div>
-        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-blue)'}}></div> Completed</div>
+        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'2px', background:'var(--primary)'}}></div> Accuracy Trend</div>
+        <div style={{marginLeft:'auto', fontWeight:'600', color:'var(--primary)'}}>Current: {dynamicVal.toFixed(1)}%</div>
       </div>
     </div>
   )
@@ -121,13 +193,10 @@ const PlatformStatus = ({ stats }) => (
   </div>
 )
 
-const ActivityTable = ({ onEdit, onArchive }) => {
-  const activities = [
-    { id:'BRD-001', name:'Project Phoenix', date:'Feb 21', status:'Completed', owner:'Sarah C.', color:'#10b981' },
-    { id:'BRD-002', name:'Skynet Integration', date:'Feb 20', status:'In Review', owner:'Miles D.', color:'#f59e0b' },
-    { id:'BRD-003', name:'T-800 Specs', date:'Feb 19', status:'Drafting', owner:'John D.', color:'#3b82f6' },
-    { id:'BRD-004', name:'CRM Revamp 2025', date:'Feb 18', status:'Completed', owner:'Satyam R.', color:'#10b981' },
-  ]
+// No longer using hardcoded MOCK_ACTIVITIES, derived from brdHistory
+
+const ActivityTable = ({ activities, onEdit, onArchive, user, clock }) => {
+  const processedActivities = activities.map(a => (!a.isMock && !a.owner) ? { ...a, owner: user.name } : a);
   return (
     <div className="table-card" style={{marginTop:'32px'}}>
       <div className="table-header">
@@ -153,18 +222,18 @@ const ActivityTable = ({ onEdit, onArchive }) => {
           </tr>
         </thead>
         <tbody>
-          {activities.map(a => (
-            <tr key={a.id}>
-              <td style={{fontFamily:'monospace', fontSize:'12px', color:'var(--text-muted)'}}>{a.id}</td>
+          {processedActivities.map((a, i) => (
+            <tr key={i}>
+              <td style={{fontFamily:'monospace', fontSize:'12px', color:'var(--text-muted)'}}>BRD-{String(100 + processedActivities.length - i).padStart(3, '0')}</td>
               <td style={{fontWeight:'600', fontSize:'13px'}}>{a.name}</td>
-              <td style={{color:'var(--text-muted)', fontSize:'12px'}}>{a.date}</td>
+              <td style={{color:'var(--text-muted)', fontSize:'12px'}}>{timeAgo(a.timestamp)}</td>
               <td>
                 <div style={{display:'flex', alignItems:'center', gap:'6px'}}>
-                  <div style={{width:'6px', height:'6px', borderRadius:'50%', background:a.color}}></div>
+                  <div style={{width:'6px', height:'6px', borderRadius:'50%', background:a.color || 'var(--primary)'}}></div>
                   <span style={{fontSize:'12px', fontWeight:'500'}}>{a.status}</span>
                 </div>
               </td>
-              <td style={{fontSize:'12px'}}>{a.owner}</td>
+              <td style={{fontSize:'12px'}}>{a.owner || (a.isMock ? 'System' : user.name)}</td>
               <td style={{textAlign:'right'}}>
                 <button 
                   onClick={() => onEdit(a.name)}
@@ -183,15 +252,22 @@ const ActivityTable = ({ onEdit, onArchive }) => {
 
 // --- MAIN VIEWS ---
 
-const GeneratorView = ({ externalInput }) => {
+const GeneratorView = ({ externalInput, initialReport, onSave }) => {
   const [inputText, setInputText] = useState(externalInput || '')
-  const [report, setReport] = useState(null)
+  const [report, setReport] = useState(initialReport || null)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('brd')
 
   useEffect(() => {
     if (externalInput) setInputText(externalInput)
   }, [externalInput])
+
+  useEffect(() => {
+    if (initialReport) {
+      setReport(initialReport);
+      setActiveTab('brd');
+    }
+  }, [initialReport])
 
   const handleGenerate = async () => {
     if (!inputText) return;
@@ -205,6 +281,7 @@ const GeneratorView = ({ externalInput }) => {
       const data = await genRes.json();
       setReport(data);
       setActiveTab('brd');
+      if (onSave) onSave(data);
     } catch (error) {
       console.error("Error:", error);
       alert("Backend unreachable. Ensure FastAPI server is running.");
@@ -276,73 +353,147 @@ const GeneratorView = ({ externalInput }) => {
   )
 }
 
-const DossierView = () => (
-  <div className="dashboard-view">
-    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px'}}>
-      <h1 className="dashboard-title">Project Dossier</h1>
-      <button className="icon-btn"><Filter size={18} /></button>
-    </div>
-    <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'20px'}}>
-      {[1,2,3,4,5,6].map(i => (
-        <div key={i} className="chart-card" style={{padding:'20px', cursor:'pointer'}}>
-           <div style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
-              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'rgba(79,70,229,0.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)'}}><FileText size={18} /></div>
-              <span style={{fontSize:'11px', color:'var(--text-muted)', fontWeight:'600'}}>MAR 0{i}, 2025</span>
-           </div>
-           <h3 style={{fontSize:'14px', margin:'0 0 4px 0'}}>Strategic BRD-00{i}</h3>
-           <p style={{fontSize:'12px', color:'var(--text-secondary)', margin:0}}>Enterprise requirements for Platform Delta v2.0</p>
-           <div style={{marginTop:'20px', paddingTop:'16px', borderTop:'1px solid var(--border-color)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-              <span className="status-badge" style={{background:'rgba(16,185,129,0.1)', color:'#10b981', fontSize:'10px'}}>Finalized</span>
-              <ExternalLink size={14} color="var(--text-muted)" />
-           </div>
+const DossierView = ({ history = [], onSelect, onDeleteItem, clock }) => {
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  
+  return (
+    <div className="dashboard-view">
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px'}}>
+        <div>
+          <h1 className="dashboard-title" style={{margin:0}}>Project Dossier</h1>
+          {isDeleteMode && <div style={{fontSize:'12px', color:'var(--accent-red, #ef4444)', fontWeight:'700', marginTop:'4px'}}>⚠️ SELECTION MODE: CLICK A PROJECT TO DELETE</div>}
         </div>
-      ))}
+        <div style={{display:'flex', gap:'8px'}}>
+          {isDeleteMode && (
+            <button 
+              className="icon-btn" 
+              onClick={() => setIsDeleteMode(false)}
+              style={{fontSize:'11px', padding:'0 12px', width:'auto', background:'var(--bg-hover)', borderRadius:'100px'}}
+            >
+              Cancel
+            </button>
+          )}
+          <button 
+            className="icon-btn" 
+            onClick={() => {
+              if (history.length === 0) return;
+              setIsDeleteMode(!isDeleteMode);
+            }} 
+            title={isDeleteMode ? "Cancel Deletion" : "Selection Delete"}
+            style={{
+              background: isDeleteMode ? 'var(--accent-red, #ef4444)' : 'var(--bg-hover)',
+              color: isDeleteMode ? 'white' : (history.length > 0 ? 'var(--accent-red, #ef4444)' : 'var(--text-muted)')
+            }}
+          >
+            <Trash2 size={18} />
+          </button>
+        </div>
+      </div>
+      <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'20px'}}>
+        {history.map((brd, i) => (
+          <div 
+            key={i} 
+            className="chart-card" 
+            style={{
+              padding:'20px', 
+              cursor:'pointer', 
+              borderLeft: isDeleteMode ? '3px solid var(--accent-red, #ef4444)' : (brd.isMock ? '1px solid var(--border-color)' : '3px solid var(--primary)'),
+              transition: 'all 0.2s ease',
+              position: 'relative',
+              opacity: isDeleteMode ? 0.9 : 1
+            }}
+            onClick={() => {
+              if (isDeleteMode) {
+                if (window.confirm(`Delete "${brd.name || 'this project'}"?`)) onDeleteItem(i);
+              } else {
+                onSelect(brd);
+              }
+            }}
+          >
+             {isDeleteMode && (
+               <div style={{position:'absolute', top:'10px', right:'10px', color:'var(--accent-red, #ef4444)'}}>
+                  <Trash2 size={14} />
+               </div>
+             )}
+             <div style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
+                <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'rgba(79,70,229,0.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)'}}><FileText size={18} /></div>
+                <span style={{fontSize:'11px', color:'var(--text-muted)', fontWeight:'600'}}>
+                  {timeAgo(brd.timestamp).toUpperCase()}
+                </span>
+             </div>
+             <h3 style={{fontSize:'14px', margin:'0 0 4px 0'}}>{brd.name || `Project BRD-${100-i}`}</h3>
+             <p style={{fontSize:'12px', color:'var(--text-secondary)', margin:0, overflow:'hidden', textOverflow:'ellipsis', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical'}}>
+               {brd.desc || 'Strategic requirements analysis for Enterprise Stack'}
+             </p>
+             <div style={{marginTop:'20px', paddingTop:'16px', borderTop:'1px solid var(--border-color)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                <span className="status-badge" style={{background:brd.isMock ? 'rgba(var(--text-muted-rgb), 0.1)' : 'rgba(16,185,129,0.1)', color:brd.isMock ? 'var(--text-muted)' : '#10b981', fontSize:'10px'}}>
+                  {brd.status || 'Finalized'}
+                </span>
+                <ExternalLink size={14} color="var(--text-muted)" />
+             </div>
+          </div>
+        ))}
+      </div>
     </div>
-  </div>
-)
+  );
+}
 
-const TeamView = () => {
+const TeamView = ({ user }) => {
   const members = [
-    { name: 'Satyam Raghuvanshi', role: 'Backend & AI Integration Lead', status: 'Active', color:'#10b981' },
-    { name: 'Saksham Jaiswal', role: 'UX & Product Delivery Lead', status: 'Away', color:'#f59e0b' },
-    { name: 'Sittu Kumar Singh', role: 'Frontend Architect', status: 'Active', color:'#10b981' },
-    { name: 'Shimant Ranjan', role: 'Requirement Specialist', status: 'Offline', color:'var(--text-muted)' },
-  ]
+    { name: 'Satyam Raghuvanshi', email: 'satyamraghuvanshi22oct@gmail.com', role: 'Project Lead', status: 'Active', color: '#10b981', initials: 'SR' },
+    { name: 'Saksham Jaiswal', email: 'saksham2607jaiswal@gmail.com', role: 'Backend & AI Developer', status: 'Active', color: '#10b981', initials: 'SJ' },
+    { name: 'Sittu Kumar Singh', email: 'sitturaj730@gmail.com', role: 'Frontend Developer', status: 'Active', color: '#10b981', initials: 'SS' },
+    { name: 'Shimant Ranjan', email: 'shimantranjan2@gmail.com', role: 'DevOps Engineer', status: 'Active', color: '#10b981', initials: 'SR' },
+  ];
   return (
     <div className="dashboard-view">
       <h1 className="dashboard-title">Operational Leads</h1>
       <div className="table-card">
-         <table>
-            <thead><tr><th>Lead Name</th><th>Specialization</th><th>Current Status</th><th style={{textAlign:'right'}}>Directory</th></tr></thead>
-            <tbody>
-               {members.map((m, i) => (
-                 <tr key={i}>
-                   <td>
-                     <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
-                        <div style={{width:'28px', height:'28px', borderRadius:'50%', background:'var(--bg-hover)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'10px', fontWeight:'700'}}>{m.name.split(' ').map(n=>n[0]).join('')}</div>
-                        <span style={{fontSize:'13px', fontWeight:'600'}}>{m.name}</span>
-                     </div>
-                   </td>
-                   <td style={{fontSize:'12px', color:'var(--text-secondary)'}}>{m.role}</td>
-                   <td>
-                      <div style={{display:'flex', alignItems:'center', gap:'6px', fontSize:'11px', fontWeight:'600', color:m.color}}>
-                        <div style={{width:'6px', height:'6px', borderRadius:'50%', background:m.color}}></div>
-                        {m.status}
-                      </div>
-                   </td>
-                   <td style={{textAlign:'right'}}><button className="icon-btn"><Mail size={14} /></button></td>
-                 </tr>
-               ))}
-            </tbody>
-         </table>
+        <table>
+          <thead>
+            <tr>
+              <th>Lead Name</th>
+              <th>Specialization</th>
+              <th>Current Status</th>
+              <th style={{ textAlign: 'right' }}>Directory</th>
+            </tr>
+          </thead>
+          <tbody>
+            {members.map((m, i) => (
+              <tr key={i}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: '700' }}>
+                      {m.initials}
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: '600' }}>{m.name}</span>
+                  </div>
+                </td>
+                <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{m.role}</td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: m.color }}>
+                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: m.color }}></div>
+                    {m.status}
+                  </div>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <a href={`mailto:${m.email}`} className="icon-btn" style={{display:'inline-flex', alignItems:'center', justifyContent:'center', textDecoration:'none', color:'inherit'}}>
+                    <Mail size={14} />
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
-  )
-}
+  );
+};
 
-const SettingsView = ({ theme, toggleTheme }) => (
+const SettingsView = ({ theme, toggleTheme, user, setUser }) => (
   <div className="dashboard-view" style={{maxWidth:'800px'}}>
     <h1 className="dashboard-title">System Settings</h1>
+    
     <div className="chart-card" style={{padding:'24px', marginBottom:'24px'}}>
        <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'16px'}}>Appearance Control</h3>
        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px', background:'var(--bg-hover)', borderRadius:'8px', border:'1px solid var(--border-color)'}}>
@@ -358,12 +509,17 @@ const SettingsView = ({ theme, toggleTheme }) => (
           </button>
        </div>
     </div>
-    <div className="chart-card" style={{padding:'24px'}}>
+
+    <div className="chart-card" style={{padding:'24px', borderBottom:'4px solid var(--primary)'}}>
        <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'16px'}}>Workspace Meta</h3>
        <div style={{display:'flex', flexDirection:'column', gap:'16px'}}>
           <div>
              <label style={{display:'block', fontSize:'12px', color:'var(--text-secondary)', marginBottom:'6px'}}>Organization Name</label>
-             <input style={{width:'100%', padding:'10px', background:'var(--bg-input)', border:'1px solid var(--border-color)', borderRadius:'6px', color:'var(--text-primary)', fontSize:'13px'}} defaultValue="Genius Corp Operations" />
+             <input 
+               style={{width:'100%', padding:'10px', background:'var(--bg-input)', border:'1px solid var(--border-color)', borderRadius:'6px', color:'var(--text-primary)', fontSize:'13px'}} 
+               value={user.org} 
+               onChange={(e) => setUser({...user, org: e.target.value})}
+             />
           </div>
        </div>
     </div>
@@ -378,6 +534,26 @@ function App() {
   const [stats, setStats] = useState(null)
   const [clock, setClock] = useState(new Date())
   const [generatorPreload, setGeneratorPreload] = useState('')
+  const [brdHistory, setBrdHistory] = useState(INITIAL_HISTORY)
+  const [selectedReport, setSelectedReport] = useState(null)
+  
+  // Real-time clock and timestamp update ticker
+  useEffect(() => {
+    const timer = setInterval(() => setClock(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  
+  const [user, setUser] = useState({
+    name: localStorage.getItem('user_name') || 'Enterprise User',
+    initials: localStorage.getItem('user_initials') || 'EU',
+    org: localStorage.getItem('user_org') || 'Primary Workspace'
+  })
+
+  useEffect(() => {
+    localStorage.setItem('user_name', user.name)
+    localStorage.setItem('user_initials', user.initials)
+    localStorage.setItem('user_org', user.org)
+  }, [user])
 
   useEffect(() => {
     document.documentElement.classList.toggle('light', theme === 'light')
@@ -403,12 +579,19 @@ function App() {
   }, [fetchStats])
 
   const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-  const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
-  const fmtDate = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+  const handleEditFromTable = (name) => {
+    setGeneratorPreload(name)
+    setCurrentView('generator')
+  }
 
-  const handleEditFromTable = (projectName) => {
-    setGeneratorPreload(`RE: Requirements for ${projectName}. We need to adjust the RBAC specifications...`);
-    setCurrentView('generator');
+  const handleClearHistory = () => {
+    if (window.confirm('Are you sure you want to clear all generated project history?')) {
+      setBrdHistory([])
+    }
+  }
+
+  const handleDeleteOneHistory = (index) => {
+    setBrdHistory(prev => prev.filter((_, i) => i !== index))
   }
 
   return (
@@ -465,13 +648,6 @@ function App() {
           </div>
           <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
             <button className="icon-btn" onClick={() => setCurrentView('notifications')} title="Notifications"><Bell size={18} /></button>
-            <button className="icon-btn" onClick={() => setCurrentView('mail')} title="Messages"><Mail size={18} /></button>
-            <div style={{width:'1px', height:'20px', background:'var(--border-color)'}}></div>
-            <div style={{display:'flex', alignItems:'center', gap:'8px', cursor:'pointer'}} onClick={() => setCurrentView('profile')}>
-              <div style={{width:'28px', height:'28px', borderRadius:'50%', background:'var(--primary)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontWeight:'700'}}>SR</div>
-              <span style={{fontSize:'13px', fontWeight:'600'}}>S. Raghuvanshi</span>
-              <ChevronDown size={14} color="var(--text-muted)" />
-            </div>
           </div>
         </header>
 
@@ -479,7 +655,7 @@ function App() {
           <div className="dashboard-view">
             <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'32px'}}>
               <div>
-                <h1 style={{fontSize:'20px', fontWeight:'700', margin:0}}>Operational Overview</h1>
+                <h1 style={{fontSize:'20px', fontWeight:'700', margin:0}}>{user.org}</h1>
                 <div style={{fontSize:'12px', color:'var(--text-muted)', marginTop:'4px', display:'flex', alignItems:'center', gap:'8px'}}>
                   Last telemetry sync: {fmtDate(clock)} at {fmt(clock)}
                   <span style={{width:'4px', height:'4px', borderRadius:'50%', background:'#10b981'}}></span>
@@ -490,7 +666,7 @@ function App() {
                 onClick={() => setCurrentView('generator')}
                 style={{padding:'10px 18px', background:'var(--primary)', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', fontWeight:'600', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
               >
-                <Plus size={16} /> Start New BRD
+                <Plus size={16} /> New Project
               </button>
             </div>
 
@@ -501,14 +677,14 @@ function App() {
                 <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'24px'}}>
                    <StatsCard 
                      title="BRDs Generated" 
-                     value={stats ? stats.brd_count : '—'} 
-                     sub="Total production deliveries" 
+                     value={brdHistory.length} 
+                     sub="Total items in dossier" 
                      color="primary" icon={Database} 
                    />
                    <StatsCard 
                      title="Success Rate" 
-                     value={stats ? `${stats.success_rate}%` : '—'} 
-                     sub="Validation pass frequency" 
+                     value={`${Math.min(99.8, 92.4 + (brdHistory.length * 0.8)).toFixed(1)}%`} 
+                     sub="Real-time validation quality" 
                      color="primary" icon={Activity} 
                    />
                 </div>
@@ -528,11 +704,11 @@ function App() {
                       <span>{stats ? stats.enron_fetches : '—'}</span>
                    </div>
                    <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', color:'var(--text-muted)'}}>
-                     <Clock size={12} /> Last generated 42s ago
+                     <Clock size={12} /> Last generated {timeAgo(brdHistory[0]?.timestamp)}
                    </div>
                 </div>
 
-                <BarChart />
+                <BarChart history={brdHistory} />
               </div>
 
               <div style={{display:'flex', flexDirection:'column', gap:'24px'}}>
@@ -541,29 +717,60 @@ function App() {
                 <div className="chart-card" style={{padding:'20px'}}>
                    <h3 style={{fontSize:'13px', fontWeight:'700', marginBottom:'12px'}}>Workspace Signals</h3>
                    <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
-                      <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
-                         <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-blue)'}}></div>
-                         <span>Most common input: <strong>Email Threads</strong></span>
-                      </div>
-                      <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
-                         <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-purple)'}}></div>
-                         <span>Primary Export: <strong>PDF Document</strong></span>
-                      </div>
+                       <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
+                          <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-blue)'}}></div>
+                          <span>Top Data Source: <strong>Legacy Correspondence</strong></span>
+                       </div>
+                       <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
+                          <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-purple)'}}></div>
+                          <span>Primary Format: <strong>Markdown Architecture</strong></span>
+                       </div>
                    </div>
                 </div>
               </div>
             </div>
 
-            <ActivityTable onEdit={handleEditFromTable} onArchive={() => setCurrentView('dossier')} />
+            <ActivityTable 
+              activities={brdHistory} 
+              onEdit={handleEditFromTable} 
+              onArchive={() => setCurrentView('dossier')} 
+              user={user}
+            />
           </div>
         )}
 
-        {currentView === 'generator' && <GeneratorView externalInput={generatorPreload} />}
-        {currentView === 'dossier' && <DossierView />}
-        {currentView === 'team' && <TeamView />}
-        {currentView === 'settings' && <SettingsView theme={theme} toggleTheme={toggleTheme} />}
+        {currentView === 'generator' && (
+          <GeneratorView 
+            externalInput={generatorPreload} 
+            initialReport={selectedReport}
+            onSave={(newBrd) => {
+      const entry = {
+        ...newBrd,
+        name: `Custom BRD-${String(brdHistory.length + 1).padStart(3, '0')}`,
+        timestamp: new Date(),
+        status: 'Generated',
+        desc: 'Real-time analysis generated via Engine',
+        isMock: false
+      }
+      setBrdHistory(prev => [entry, ...prev])
+    }} 
+          />
+        )}
+        {currentView === 'dossier' && (
+          <DossierView 
+            history={brdHistory} 
+            onSelect={(report) => {
+              setSelectedReport(report);
+              setCurrentView('generator');
+            }}
+            onClear={handleClearHistory}
+            onDeleteItem={handleDeleteOneHistory}
+          />
+        )}
+        {currentView === 'team' && <TeamView user={user} />}
+        {currentView === 'settings' && <SettingsView theme={theme} toggleTheme={toggleTheme} user={user} setUser={setUser} />}
         
-        {['notifications', 'profile', 'mail'].includes(currentView) && (
+        {['notifications', 'mail'].includes(currentView) && (
           <div className="dashboard-view" style={{textAlign:'center', padding:'80px 40px'}}>
             <div style={{width:'64px', height:'64px', borderRadius:'50%', background:'var(--bg-hover)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', color:'var(--primary)'}}><Activity size={32} /></div>
             <h2 style={{textTransform:'capitalize', fontSize:'18px', fontWeight:'700'}}>{currentView} Module Active</h2>

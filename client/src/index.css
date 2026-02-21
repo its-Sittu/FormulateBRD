@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap");
 
 :root {
   /* Core Foundation - Professional Enterprise Palette */
@@ -9,22 +9,65 @@
   --bg-card: #1e293b;
   --bg-input: #0f172a;
   --bg-hover: rgba(255, 255, 255, 0.04);
-  
+
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
-  
+
   --border-color: rgba(255, 255, 255, 0.08);
   --accent-blue: #3b82f6;
   --accent-purple: #8b5cf6;
-  
+
   /* Utilitarian Geometry */
   --radius-lg: 10px;
   --radius-md: 8px;
   --radius-sm: 6px;
   --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --glass-bg: rgba(255, 255, 255, 0.02);
+}
+
+/* Real-Time Telemetry Animations */
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  background-color: #10b981;
+  border-radius: 50%;
+  animation: pulse-dot 1.5s infinite;
+}
+
+@keyframes pulse-node {
+  0% {
+    r: 5;
+    opacity: 1;
+  }
+  50% {
+    r: 8;
+    opacity: 0.4;
+  }
+  100% {
+    r: 5;
+    opacity: 1;
+  }
+}
+
+.pulse-node {
+  animation: pulse-node 2s infinite ease-out;
 }
 
 :root.light {
@@ -33,31 +76,39 @@
   --bg-card: #ffffff;
   --bg-input: #f1f5f9;
   --bg-hover: rgba(0, 0, 0, 0.03);
-  
+
   --text-primary: #0f172a;
   --text-secondary: #475569;
   --text-muted: #64748b;
-  
+
   --border-color: #e2e8f0;
   --glass-bg: rgba(0, 0, 0, 0.01);
 }
 
-* { 
-  margin:0; 
-  padding:0; 
-  box-sizing:border-box; 
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-body { 
-  background-color: var(--bg-app); 
+body {
+  background-color: var(--bg-app);
   color: var(--text-primary);
   min-height: 100vh;
 }
 
-.app-container { display: flex; height: 100vh; overflow: hidden; }
+.app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
 
 /* Sidebar Refined */
 .sidebar {
@@ -76,8 +127,15 @@ body {
   padding: 0 8px 32px;
 }
 
-.logo-container img { width: 32px; height: 32px; }
-.brand-name { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-container img {
+  width: 32px;
+  height: 32px;
+}
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
 
 /* Navigation Grouping */
 .nav-group-label {
@@ -108,10 +166,13 @@ body {
   transition: var(--transition);
 }
 
-.nav-item:hover { color: var(--text-primary); background: var(--bg-hover); }
-.nav-item.active { 
-  background: rgba(79, 70, 229, 0.1); 
-  color: var(--primary); 
+.nav-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+.nav-item.active {
+  background: rgba(79, 70, 229, 0.1);
+  color: var(--primary);
   font-weight: 600;
 }
 
@@ -123,7 +184,7 @@ body {
 }
 
 .dashboard-title {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Outfit", sans-serif;
   font-size: 24px;
   font-weight: 700;
   margin-bottom: 24px;
@@ -149,16 +210,35 @@ body {
   transition: var(--transition);
 }
 
-.stat-card:hover { border-color: rgba(79, 70, 229, 0.3); transform: translateY(-1px); }
+.stat-card:hover {
+  border-color: rgba(79, 70, 229, 0.3);
+  transform: translateY(-1px);
+}
 
 /* Remove excessive card gradients */
-.stat-card.purple, .stat-card.blue, .stat-card.dark-blue, .stat-card.orange {
+.stat-card.purple,
+.stat-card.blue,
+.stat-card.dark-blue,
+.stat-card.orange {
   background: var(--bg-card);
 }
 
-.stat-value { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
-.stat-header { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
-.stat-sub { font-size: 12px; color: var(--text-muted); }
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.stat-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stat-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
 
 /* Small inline stats */
 .secondary-stats-row {
@@ -171,9 +251,21 @@ body {
   border-radius: var(--radius-md);
 }
 
-.small-stat { display: flex; flex-direction: column; gap: 4px; }
-.small-stat label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; }
-.small-stat span { font-size: 14px; font-weight: 700; }
+.small-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.small-stat label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.small-stat span {
+  font-size: 14px;
+  font-weight: 700;
+}
 
 .icon-btn {
   background: var(--bg-card);
@@ -233,10 +325,18 @@ body {
   transform: translateY(-4px);
 }
 
-.stat-card.purple { background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
-.stat-card.blue { background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%); }
-.stat-card.dark-blue { background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f97316 0%, #ec4899 100%); }
+.stat-card.purple {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+}
+.stat-card.blue {
+  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+}
+.stat-card.dark-blue {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+}
+.stat-card.orange {
+  background: linear-gradient(135deg, #f97316 0%, #ec4899 100%);
+}
 
 /* Charts Section */
 .charts-split {
@@ -311,7 +411,8 @@ td {
   gap: 24px;
 }
 
-.gen-panel-left, .gen-panel-right {
+.gen-panel-left,
+.gen-panel-right {
   background: var(--bg-card);
   border-radius: 24px;
   padding: 24px;
@@ -321,14 +422,26 @@ td {
   flex-direction: column;
 }
 
-.gen-panel-left { flex: 0.35; }
-.gen-panel-right { flex: 0.65; }
+.gen-panel-left {
+  flex: 0.35;
+}
+.gen-panel-right {
+  flex: 0.65;
+}
 
 /* In-line style overrides for light mode readability */
-.light .stat-icon { background: rgba(0, 0, 0, 0.05); }
-.light .nav-item:hover { background: #f1f5f9; }
-.light .icon-btn { background: #ffffff; }
-.light .search-bar { background: #ffffff; }
+.light .stat-icon {
+  background: rgba(0, 0, 0, 0.05);
+}
+.light .nav-item:hover {
+  background: #f1f5f9;
+}
+.light .icon-btn {
+  background: #ffffff;
+}
+.light .search-bar {
+  background: #ffffff;
+}
 
 /* Markdown Styling for Professional Reports */
 .markdown-body {
@@ -337,22 +450,47 @@ td {
   color: var(--text-secondary);
 }
 
-.markdown-body h1, .markdown-body h2, .markdown-body h3 {
-  font-family: 'Outfit', sans-serif;
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-family: "Outfit", sans-serif;
   color: var(--text-primary);
   margin-top: 24px;
   margin-bottom: 12px;
   letter-spacing: -0.01em;
 }
 
-.markdown-body h1 { font-size: 22px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
-.markdown-body h2 { font-size: 18px; color: var(--accent-blue); }
-.markdown-body h3 { font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; }
+.markdown-body h1 {
+  font-size: 22px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 8px;
+}
+.markdown-body h2 {
+  font-size: 18px;
+  color: var(--accent-blue);
+}
+.markdown-body h3 {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 800;
+}
 
-.markdown-body p { margin-bottom: 16px; font-weight: 400; }
-.markdown-body strong { color: var(--text-primary); font-weight: 600; }
-.markdown-body ul { margin-bottom: 16px; padding-left: 20px; }
-.markdown-body li { margin-bottom: 8px; }
+.markdown-body p {
+  margin-bottom: 16px;
+  font-weight: 400;
+}
+.markdown-body strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.markdown-body ul {
+  margin-bottom: 16px;
+  padding-left: 20px;
+}
+.markdown-body li {
+  margin-bottom: 8px;
+}
 
 .markdown-body blockquote {
   border-left: 4px solid var(--primary);
@@ -362,4 +500,3 @@ td {
   margin: 16px 0;
   font-style: italic;
 }
-
