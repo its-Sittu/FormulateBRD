@@ -1,4 +1,4 @@
-##FormulateBRD: An agentic Business Analyst
+##  FormulateBRD: An agentic Business Analyst
 
 
 # Auto-BRD Generator
