@@ -10,10 +10,6 @@ server/venv/
 dist/
 build/
 
-# Dataset (too large for GitHub)
-dataset/
-*.csv
-
 # Node
 node_modules/
 client/node_modules/
