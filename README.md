@@ -1,83 +1,94 @@
+# FormulateBRD — The Agentic Business Analyst
 
-## FormulateBRD - An agentic Business Analyst
+[![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/Frontend-React-61DAFB?style=flat&logo=react)](https://reactjs.org/)
+[![Gemini](https://img.shields.io/badge/AI-Gemini_Flash-4285F4?style=flat&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
+[![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
 
-FormulateBRD is an AI-powered Business Requirements Document generation tool designed to bridge the gap between unstructured business communication and structured software requirements. Business ideas are often shared through emails, chats, and meeting notes, leading to ambiguity, misalignment, and costly rework. FormulateBRD uses a constrained AI Business Analyst workflow to analyze inputs, generate enterprise-ready BRDs, and validate gaps through clarification questions. The system operates in a secure, stateless, risk-free demo mode, focusing on accuracy over assumptions. By bringing clarity before development begins, FormulateBRD reduces delays, improves stakeholder alignment, and accelerates project kick-off across teams
+**FormulateBRD** is an AI-powered pipeline designed to bridge the gap between unstructured business communication and structured software requirements. It automates the extraction and formalization of business needs into enterprise-ready **Business Requirements Documents (BRDs)**, reducing ambiguity and accelerating project kick-off.
 
-A modern, AI-powered Business Requirements Document (BRD) generator with an enterprise-grade dashboard, Enron dataset integration, and a mock 3-stage prompt engineering pipeline.
+---
 
-## 📦 Project Structure
+## 🧠 The Agentic Pipeline
 
-```text
-/client      -> React + Vite Frontend (Dashboard UI)
-/server      -> Python FastAPI Backend (LLM Mock & Data Logic)
-/dataset     -> Local Dataset (Enron Emails)
-```
+FormulateBRD operates on a strict **3-stage analytical workflow** to ensure high-fidelity outputs over creative assumptions.
 
-## 🚀 Installation & Setup
+1. **Requirement Analysis**: The system deconstructs raw input (emails, chats, notes) into factual nodes—Business Problems, Objectives, Stakeholders, and Explicit Requirements—without making guesses.
+2. **BRD Generation**: Analysis data is transformed into a formal document using standardized enterprise headers, ensuring consistent formatting and professional language.
+3. **Validation & Clarification**: The final stage performs a gap analysis, identifying ambiguities or missing metrics and generating a list of actionable "Clarification Questions" for stakeholders.
+
+---
+
+## ✨ Key Features
+
+- **📊 Operational Dashboard**: Real-time telemetry monitoring generation velocity, AI engine status, and session metrics.
+- **📧 Business Simulation**: Integrated with the **Enron Email Dataset** to allow instant testing and demonstration using real-world enterprise communication.
+- **🌓 Enterprise UI**: High-density interface with support for **Dark/Light modes**, built using the Inter and Outfit typography systems.
+- **📄 Markdown First**: All requirements are generated and rendered in standard Markdown, ready for export or integration into tools like Jira and Confluence.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- **Python 3.8+**
-- **Node.js 16+** & **npm**
+- **Python 3.10+** (Backend)
+- **Node.js 18+** & **npm** (Frontend)
+- **Gemini API Key** (Optional, falls back to Mock mode)
 
 ### 1. Backend Setup (Server)
 
-Navigate to the server directory and install Python dependencies:
-
 ```bash
 cd server
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-**Key Dependencies:**
+# Configure Environment
+echo "GEMINI_API_KEY=your_key_here" > .env
 
-- `fastapi`: Web framework
-- `uvicorn`: ASGI server
-- `pandas`: Data manipulation
-- `python-multipart`: Form handling
-
-**Start the Server:**
-
-```bash
+# Start FastAPI server
 python -m uvicorn main:app --reload --port 8000
 ```
 
-*The server will start at `http://localhost:8000`*
-
 ### 2. Frontend Setup (Client)
-
-Open a new terminal, navigate to the client directory, and install Node dependencies:
 
 ```bash
 cd client
+# Install dependencies
 npm install
-```
 
-**Key Dependencies:**
-
-- `react`, `react-dom`: UI library
-- `lucide-react`: Icons
-- `react-markdown`: Rendering markdown output
-- `vite`: Build tool
-
-**Start the Client:**
-
-```bash
+# Start development server
 npm run dev
 ```
 
-*The app will run at `http://localhost:5173`*
+*Access the dashboard at `http://localhost:5173`.*
 
-## 🛠 Features
+---
 
-1. **Dashboard**: Stats, Charts, and Activity Logs.
-2. **New Report**:
-    - **Enron Data**: Load random emails from the local dataset for testing.
-    - **Generator**: Creates Analysis, BRD, and Clarification Questions (Mock).
-3. **Team**: View core team members and roles.
-4. **Profile**: Personalized user profile (Satyam Raghuvanshi).
+## 📦 Project Architecture
 
-## 📂 Dataset
+```text
+├── client/          # React + Vite (Dashboard UI & Markdown Rendering)
+├── server/          # Python FastAPI (Agentic Pipeline & Enron Logic)
+├── dataset/         # Local Data (Enron Email Sample)
+└── README.md        # Documentation
+```
 
-The project includes the Enron Email Dataset in `dataset/emails.csv`.
-The server is configured to load this file automatically on startup.
+---
+
+## 👥 The Team
+
+- **Satyam Raghuvanshi**: Backend & AI Integration Lead
+- **Saksham Jaiswal**: UX & Product Delivery Lead
+- **Sittu Kumar Singh**: Frontend Architect
+- **Shimant Ranjan**: Requirement Specialist
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
