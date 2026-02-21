@@ -1,3 +1,6 @@
+##FormulateBRD: An agentic Business Analyst
+
+
 # Auto-BRD Generator
 
 A modern, AI-powered Business Requirements Document (BRD) generator with an enterprise-grade dashboard, Enron dataset integration, and a mock 3-stage prompt engineering pipeline.
