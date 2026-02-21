@@ -28,6 +28,9 @@ COPY server/ ./server/
 # Copy the frontend build from stage 1
 COPY --from=build-stage /app/client/dist ./client/dist
 
+# Set working directory to server for correct imports
+WORKDIR /app/server
+
 # Expose the port (FastAPI default or Railway provided)
 EXPOSE 8000
 
@@ -36,4 +39,4 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
 # Start command
-CMD ["sh", "-c", "uvicorn server.main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
