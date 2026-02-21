@@ -24,7 +24,9 @@ import {
   ExternalLink,
   Download,
   Trash2,
-  Filter
+  Filter,
+  Mic,
+  Paperclip
 } from 'lucide-react'
 import './index.css'
 
@@ -198,7 +200,7 @@ const PlatformStatus = ({ stats }) => (
 const ActivityTable = ({ activities, onEdit, onArchive, user, clock }) => {
   const processedActivities = activities.map(a => (!a.isMock && !a.owner) ? { ...a, owner: user.name } : a);
   return (
-    <div className="table-card" style={{marginTop:'32px'}}>
+    <div className="table-card" style={{marginTop:'32px'}} data-tick={clock?.getTime()}>
       <div className="table-header">
         <div>
           <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Recent Generation Activity</h3>
@@ -291,14 +293,30 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
   }
 
   const loadEnron = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/enron/random`);
-        if (!response.ok) throw new Error('Failed to fetch');
-        const data = await response.json();
-        setInputText(`Subject: ${data.subject}\nFrom: ${data.from}\n\n${data.body}`);
-      } catch { alert("Failed to load Enron sample"); } finally { setIsLoading(false); }
+    setIsLoading(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/enron/random`);
+      if (!response.ok) throw new Error('Failed to fetch');
+      const data = await response.json();
+      setInputText(`Subject: ${data.subject}\nFrom: ${data.from}\n\n${data.body}`);
+    } catch { alert("Failed to load Enron sample"); } finally { setIsLoading(false); }
   }
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target.result;
+      setInputText(prev => prev + `\n\n--- Attached File: ${file.name} ---\n${content}`);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleVoiceSim = () => {
+    const timestamp = new Date().toLocaleTimeString();
+    setInputText(prev => prev + `\n\n--- Logged Voice Note (${timestamp}) ---\n[SIMULATED TRANSCRIPTION]: "The portal must support high-density data visualizations and real-time telemetry pulses similar to the main dashboard. Priority is on operational transparency."`);
+  };
 
   return (
     <div className="dashboard-view">
@@ -310,7 +328,16 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
               <p style={{fontSize:'12px', color:'var(--text-muted)'}}>Provide business context or load sample data.</p>
             </div>
             <div style={{display:'flex', gap:'8px', marginBottom:'12px'}}>
-               <button onClick={() => setInputText('')} className="icon-btn" title="Clear"><Trash2 size={14} /></button>
+               <button onClick={() => setInputText('')} className="icon-btn" title="Clear Canvas"><Trash2 size={14} /></button>
+               <input 
+                 type="file" 
+                 id="file-upload" 
+                 style={{display:'none'}} 
+                 accept=".txt,.md,.json,.csv"
+                 onChange={handleFileUpload}
+               />
+               <button onClick={() => document.getElementById('file-upload').click()} className="icon-btn" title="Attach Doc"><Paperclip size={14} /></button>
+               <button onClick={handleVoiceSim} className="icon-btn" title="Voice Note"><Mic size={14} /></button>
                <button onClick={loadEnron} style={{flex:1, padding:'6px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'6px', fontSize:'11px', fontWeight:'600', cursor:'pointer'}}>Load Enron Sample</button>
             </div>
             <textarea 
@@ -357,7 +384,7 @@ const DossierView = ({ history = [], onSelect, onDeleteItem, clock }) => {
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   
   return (
-    <div className="dashboard-view">
+    <div className="dashboard-view" data-tick={clock?.getTime()}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px'}}>
         <div>
           <h1 className="dashboard-title" style={{margin:0}}>Project Dossier</h1>
@@ -735,6 +762,7 @@ function App() {
               onEdit={handleEditFromTable} 
               onArchive={() => setCurrentView('dossier')} 
               user={user}
+              clock={clock}
             />
           </div>
         )}
@@ -765,6 +793,7 @@ function App() {
             }}
             onClear={handleClearHistory}
             onDeleteItem={handleDeleteOneHistory}
+            clock={clock}
           />
         )}
         {currentView === 'team' && <TeamView user={user} />}
