@@ -59,6 +59,10 @@ origins = [
     "http://localhost:5174",
     "http://localhost:3000",
 ]
+# Add production client URL if set
+_client_url = os.getenv("CLIENT_URL")
+if _client_url:
+    origins.append(_client_url)
 
 app.add_middleware(
     CORSMiddleware,

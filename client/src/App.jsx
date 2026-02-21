@@ -200,7 +200,7 @@ const GeneratorView = ({ externalInput }) => {
     try {
       const formData = new FormData();
       formData.append('context', inputText);
-      const genRes = await fetch('http://localhost:8000/generate', { method: 'POST', body: formData });
+      const genRes = await fetch(`${import.meta.env.VITE_API_URL}/generate`, { method: 'POST', body: formData });
       if (!genRes.ok) throw new Error('Generation failed');
       const data = await genRes.json();
       setReport(data);
@@ -216,7 +216,7 @@ const GeneratorView = ({ externalInput }) => {
   const loadEnron = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch('http://localhost:8000/enron/random');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/enron/random`);
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
         setInputText(`Subject: ${data.subject}\nFrom: ${data.from}\n\n${data.body}`);
@@ -386,7 +386,7 @@ function App() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const r = await fetch('http://localhost:8000/stats')
+      const r = await fetch(`${import.meta.env.VITE_API_URL}/stats`)
       if (r.ok) setStats(await r.json())
     } catch { /* Backend unreachable */ }
   }, [])
