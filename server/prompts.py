@@ -13,14 +13,14 @@ GENERAL CONSTRAINTS:
 - Use professional, neutral, business-appropriate language.
 
 Analyze the input and extract factual information only.
-Output strictly in this format:
+Output strictly in this format using bullet points for multiple items:
 
 1. Business Problem:
-2. Business Objectives:
-3. Stakeholders / Users:
-4. Explicit Functional Requirements:
-5. Explicit Constraints:
-6. Missing or Unclear Information:
+2. Business Objectives (List):
+3. Stakeholders / Users (List):
+4. Explicit Functional Requirements (Numbered List):
+5. Explicit Constraints (List):
+6. Missing or Unclear Information (List):
 
 Do NOT generate a BRD in this stage.
 
@@ -38,6 +38,8 @@ Your input is a structured requirement analysis. Use ONLY this information.
 
 Strict Rules:
 - Do NOT invent new features, users, or requirements.
+- Use Numbered Lists for ALL Functional Requirements.
+- Use Bullet Points for Stakeholders, Objectives, and Success Metrics.
 - Clearly label inferred non-functional requirements as "(Inferred)".
 - Reflect missing information as assumptions.
 - Use formal, professional business language.
@@ -68,16 +70,14 @@ Instructions:
 - Do NOT add new requirements.
 - Focus only on clarity, completeness, and business risk.
 
-Output ONLY:
+Output ONLY a bulleted list of:
 "Clarification Questions"
 
 Each question must:
 - Address a specific missing or unclear business detail
 - Be concise and actionable
 - Avoid technical or implementation language
-
-Input (Generated BRD):
-{brd_output}
+- Follow a strict "- [Question]" format
 """
 
 # Master Prompt (Unified 3-Stage Workflow)
@@ -108,20 +108,29 @@ Analyze the input and extract factual information only.
 
 Output strictly in this format:
 1. Business Problem:
-2. Business Objectives:
-3. Stakeholders / Users:
-4. Explicit Functional Requirements:
-5. Explicit Constraints:
-6. Missing or Unclear Information:
+2. Business Objectives (List):
+3. Stakeholders / Users (List):
+4. Explicit Functional Requirements (List):
+5. Explicit Constraints (List):
+6. Missing or Unclear Information (List):
 
 Do NOT generate a BRD in this stage.
 
 ────────────────────────
 STAGE 2: BRD GENERATION
 ────────────────────────
-Using ONLY the output from Stage 1, generate a formal
-Business Requirements Document with the following sections ONLY:
+Using ONLY the output from Stage 1, generate a formal 
+Business Requirements Document. 
 
+STRICT FORMATTING RULES:
+- Use Numbered Lists for ALL Functional Requirements.
+- Use Bullet Points for Objectives, Stakeholders, and Constraints.
+- Do NOT add new requirements.
+- Clearly label inferred non-functional requirements as "(Inferred)".
+- Reflect missing information as assumptions.
+- Do NOT include technical architecture or implementation details.
+
+Generate with these sections ONLY:
 - Project Overview
 - Business Objectives
 - Stakeholders
@@ -130,19 +139,14 @@ Business Requirements Document with the following sections ONLY:
 - Assumptions & Constraints
 - Success Metrics
 
-Rules:
-- Do NOT add new requirements.
-- Clearly label inferred non-functional requirements as "(Inferred)".
-- Reflect missing information as assumptions.
-- Do NOT include technical architecture or implementation details.
-
 ────────────────────────
 STAGE 3: VALIDATION & CLARIFICATION
 ────────────────────────
 Review the generated BRD and identify gaps, ambiguities, or risks.
 
-Output ONLY:
-"Clarification Questions"
+Output ONLY a bulleted list titled "Clarification Questions":
+- [Question]
+- [Question]
 
 Each question must:
 - Address a specific missing or unclear business detail

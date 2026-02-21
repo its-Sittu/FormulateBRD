@@ -71,41 +71,61 @@ app.add_middleware(
 # --- LLM Helpers ---
 
 def call_gemini(prompt: str) -> str:
-    """Call Gemini using the new google.genai SDK. Raises on error."""
-    response = gemini_client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=prompt
-    )
-    return response.text
+    """Call Gemini with exponential backoff retry for 503/429 errors."""
+    max_retries = 3
+    base_delay = 2
+    for attempt in range(max_retries):
+        try:
+            response = gemini_client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt
+            )
+            return response.text
+        except Exception as e:
+            err_msg = str(e)
+            is_transient = "503" in err_msg or "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "UNAVAILABLE" in err_msg
+            if is_transient and attempt < max_retries - 1:
+                wait_time = base_delay * (2 ** attempt)
+                print(f"⚠️ Gemini transient error ({err_msg[:50]}...). Retrying in {wait_time}s (Attempt {attempt + 1}/{max_retries})...")
+                time.sleep(wait_time)
+                continue
+            raise e
+
+from prompts import MASTER_PIPELINE_PROMPT
 
 def generate_with_real_llm(user_input: str) -> dict:
-    """Real 3-stage Gemini pipeline: Analysis → BRD → Validation."""
+    """Optimized 1-stage Gemini pipeline: All sections generated in one round-trip."""
     try:
-        print("Stage 1: Requirement Analysis...")
-        analysis = call_gemini(ANALYSIS_SYSTEM_PROMPT.format(user_input=user_input))
+        print("Executing Unified 3-Stage Pipeline...")
+        full_output = call_gemini(MASTER_PIPELINE_PROMPT.format(user_input=user_input))
+        
+        # Split the unified output into logical sections for the frontend
+        # The prompt uses ──────────────────────── as separators or headers
+        sections = full_output.split("STAGE ")
+        analysis = sections[1] if len(sections) > 1 else "Analysis extraction failed."
+        brd = sections[2] if len(sections) > 2 else "BRD generation failed."
+        gaps = sections[3] if len(sections) > 3 else "Validation failed."
 
-        print("Stage 2: BRD Generation...")
-        brd = call_gemini(BRD_GENERATION_PROMPT.format(analysis_output=analysis))
-
-        print("Stage 3: Validation & Gap Analysis...")
-        gaps = call_gemini(GAP_ANALYSIS_PROMPT.format(brd_output=brd))
-
-        return {"analysis": analysis, "brd": brd, "clarification_questions": gaps}
+        return {
+            "analysis": f"## Stage 1 — Requirement Analysis\n\n{analysis}", 
+            "brd": f"## Stage 2 — Business Requirements Document\n\n{brd}", 
+            "clarification_questions": f"## Stage 3 — Validation\n\n{gaps}"
+        }
 
     except Exception as e:
         err = str(e)
         print(f"⚠️ Gemini error, falling back to mock: {err[:100]}")
         result = generate_with_mock(user_input)
         if "429" in err or "RESOURCE_EXHAUSTED" in err:
-            result["brd"] = "⚠️ **Gemini rate limit reached** (free tier). Showing mock output.\n\n" + result["brd"]
+            result["brd"] = "⚠️ **Gemini rate limit reached** (retries failed). Showing mock output.\n\n" + result["brd"]
+        elif "503" in err or "UNAVAILABLE" in err:
+            result["brd"] = "⚠️ **Gemini overloaded** (all retries failed). Showing mock output.\n\n" + result["brd"]
         else:
-            result["brd"] = f"⚠️ **Gemini error**: {err[:100]}\n\nShowing mock output:\n\n" + result["brd"]
+            result["brd"] = f"⚠️ **Gemini fatal error**: {err[:80]}...\n\nShowing mock output:\n\n" + result["brd"]
         return result
 
 def generate_with_mock(text_input: str) -> dict:
-    """Fallback mock responses when no API key is configured."""
-    import time
-    time.sleep(1)
+    """Instant fallback mock responses (removed artificial sleep)."""
     analysis = f"""## Stage 1 — Requirement Analysis (Mock)
 
 1. Business Problem:

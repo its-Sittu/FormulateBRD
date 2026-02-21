@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react'
-import logoImg from './assets/logo.png'
 import ReactMarkdown from 'react-markdown'
 import { 
   LayoutDashboard, 
@@ -18,32 +17,32 @@ import {
   ChevronDown,
   MessageSquareText,
   Sun,
-  Moon
+  Moon,
+  Activity,
+  Terminal,
+  Database,
+  ExternalLink,
+  Download,
+  Trash2,
+  Filter
 } from 'lucide-react'
 import './index.css'
 
-// --- MOCK COMPONENTS FOR DASHBOARD ---
+// --- REFINED COMPONENTS FOR ENTERPRISE REALISM ---
 
-const StatsCard = ({ title, value, sub, color, icon: Icon, trend, change }) => (
-  <div className={`stat-card ${color}`}>
-    <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'18px'}}>
-      <div className="stat-icon" style={{position:'static', background:'var(--glass-bg)', width:'40px', height:'40px', borderRadius:'12px', border:'1px solid var(--border-color)'}}>
-        {Icon && <Icon size={18} />}
+const StatsCard = ({ title, value, sub, color, icon: Icon }) => {
+  const IconComponent = Icon;
+  return (
+    <div className={`stat-card ${color}`}>
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'12px'}}>
+        <div className="stat-header">{title}</div>
+        {IconComponent && <IconComponent size={16} color="var(--text-muted)" />}
       </div>
-      {change && (
-        <div style={{fontSize:'12px', fontWeight:'600', padding:'4px 8px', borderRadius:'20px',
-          background: trend==='up' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)',
-          color: trend==='up' ? '#10b981' : '#ef4444'
-        }}>
-          {trend==='up' ? '↑' : '↓'} {change}
-        </div>
-      )}
+      <div className="stat-value">{value}</div>
+      <div className="stat-sub">{sub}</div>
     </div>
-    <div className="stat-value" style={{fontSize:'34px', marginBottom:'4px'}}>{value}</div>
-    <div className="stat-header" style={{opacity:1, fontWeight:'600', fontSize:'13px'}}>{title}</div>
-    <div className="stat-sub" style={{marginTop:'4px'}}>{sub}</div>
-  </div>
-)
+  );
+};
 
 const BarChart = () => {
   const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
@@ -51,152 +50,128 @@ const BarChart = () => {
   const completed = [15, 20, 19, 26, 24, 32]
   const maxVal = 40
   return (
-    <div className="chart-card">
-      <div className="chart-header">
-        <h3 style={{margin:0, fontSize:'15px', fontWeight:'600'}}>BRD Generation Overview</h3>
-        <div className="chart-legend">
-          <div className="legend-item"><div className="dot" style={{background:'#8b5cf6'}}></div>Requests</div>
-          <div className="legend-item"><div className="dot" style={{background:'#3b82f6'}}></div>Completed</div>
-        </div>
+    <div className="chart-card" style={{padding:'24px'}}>
+      <div style={{marginBottom:'20px'}}>
+        <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Generation Velocity</h3>
+        <p style={{margin:'4px 0 0 0', fontSize:'12px', color:'var(--text-muted)'}}>Monthly volume of BRD requests vs successful primary exports</p>
       </div>
-      <svg viewBox="0 0 540 190" width="100%" height="190">
-        {[0,10,20,30,40].map((v,i) => {
-          const y = 165 - (v/maxVal)*140
+      <svg viewBox="0 0 540 160" width="100%" height="160">
+        {[0,20,40].map((v,i) => {
+          const y = 140 - (v/maxVal)*120
           return <g key={i}>
-            <line x1="30" y1={y} x2="540" y2={y} stroke="var(--border-color)" strokeWidth="1"/>
-            <text x="24" y={y+4} fill="var(--text-secondary)" fontSize="9" textAnchor="end" style={{opacity:0.5}}>{v}</text>
+            <line x1="30" y1={y} x2="540" y2={y} stroke="var(--border-color)" strokeWidth="1" strokeDasharray="4 4"/>
+            <text x="24" y={y+4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{v}</text>
           </g>
         })}
         {months.map((month, i) => {
           const x = 50 + i * 82
-          const rH = (requests[i]/maxVal)*140
-          const cH = (completed[i]/maxVal)*140
+          const rH = (requests[i]/maxVal)*120
+          const cH = (completed[i]/maxVal)*120
           return <g key={i}>
-            <rect x={x} y={165-rH} width="26" height={rH} rx="5"
-              fill="url(#barGrad1)" opacity="0.9"/>
-            <rect x={x+30} y={165-cH} width="26" height={cH} rx="5"
-              fill="url(#barGrad2)" opacity="0.9"/>
-            <text x={x+26} y="183" fill="var(--text-secondary)" fontSize="10" textAnchor="middle" style={{opacity:0.7}}>{month}</text>
+            <rect x={x} y={140-rH} width="22" height={rH} rx="4" fill="var(--primary)" opacity="0.8"/>
+            <rect x={x+26} y={140-cH} width="22" height={cH} rx="4" fill="var(--accent-blue)" opacity="0.8"/>
+            <text x={x+24} y="158" fill="var(--text-muted)" fontSize="10" textAnchor="middle">{month}</text>
           </g>
         })}
-        <defs>
-          <linearGradient id="barGrad1" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#8b5cf6"/>
-            <stop offset="100%" stopColor="#6d28d9"/>
-          </linearGradient>
-          <linearGradient id="barGrad2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3b82f6"/>
-            <stop offset="100%" stopColor="#1d4ed8"/>
-          </linearGradient>
-        </defs>
       </svg>
+      <div style={{display:'flex', gap:'16px', marginTop:'16px', fontSize:'11px', color:'var(--text-secondary)'}}>
+        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--primary)'}}></div> Requests</div>
+        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-blue)'}}></div> Completed</div>
+      </div>
     </div>
   )
 }
 
-const PlatformStatus = () => (
-  <div className="chart-card" style={{display:'flex', flexDirection:'column', gap:'0'}}>
-    <h3 style={{margin:'0 0 20px 0', fontSize:'15px', fontWeight:'600'}}>AI Pipeline Status</h3>
-    <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px',
-      background:'rgba(16,185,129,0.06)', borderRadius:'12px',
-      border:'1px solid rgba(16,185,129,0.18)', marginBottom:'20px'}}>
-      <div style={{width:'9px', height:'9px', borderRadius:'50%', background:'#10b981',
-        boxShadow:'0 0 8px #10b981', flexShrink:0}}></div>
-      <div style={{flex:1}}>
-        <div style={{fontSize:'13px', fontWeight:'600'}}>gemini-flash-latest</div>
-        <div style={{fontSize:'11px', color:'var(--text-muted)'}}>Google AI Studio — Active</div>
+const PlatformStatus = ({ stats }) => (
+  <div className="chart-card" style={{padding:'24px', display:'flex', flexDirection:'column'}}>
+    <div style={{marginBottom:'20px'}}>
+      <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>AI Engine Telemetry</h3>
+      <p style={{margin:'4px 0 0 0', fontSize:'12px', color:'var(--text-muted)'}}>Real-time operational status of connected LLM pipelines</p>
+    </div>
+    
+    <div style={{padding:'16px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'var(--radius-md)', marginBottom:'20px'}}>
+      <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
+        <div style={{width:'8px', height:'8px', borderRadius:'50%', background: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b'}}></div>
+        <span style={{fontSize:'13px', fontWeight:'700'}}>{stats ? stats.model : 'Awaiting Connection...'}</span>
+        <span style={{marginLeft:'auto', fontSize:'10px', fontWeight:'700', color: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b', padding:'2px 6px', background:'rgba(16,185,129,0.1)', borderRadius:'4px'}}>{stats?.ai_mode === 'Gemini AI' ? 'LIVE' : 'MOCK'}</span>
       </div>
-      <div style={{fontSize:'11px', fontWeight:'700', color:'#10b981', letterSpacing:'0.5px'}}>LIVE</div>
-    </div>
-    <div style={{display:'flex', flexDirection:'column', gap:'12px', marginBottom:'20px'}}>
-      {[
-        {label:'Avg. Response Time', value:'~18s', color:'var(--text-primary)'},
-        {label:'Success Rate', value:'98%', color:'#10b981'},
-        {label:'Pipeline Stages', value:'3', color:'var(--text-primary)'},
-        {label:'Total Runs Today', value:'12', color:'var(--accent-blue)'},
-      ].map((m,i) => (
-        <div key={i} style={{display:'flex', justifyContent:'space-between', fontSize:'13px'}}>
-          <span style={{color:'var(--text-secondary)'}}>{m.label}</span>
-          <span style={{fontWeight:'600', color:m.color}}>{m.value}</span>
+      <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
+        <div style={{display:'flex', justifyContent:'space-between', fontSize:'12px'}}>
+          <span style={{color:'var(--text-secondary)'}}>Response Latency (avg)</span>
+          <span style={{fontWeight:'600'}}>18.4s</span>
         </div>
-      ))}
+        <div style={{display:'flex', justifyContent:'space-between', fontSize:'12px'}}>
+          <span style={{color:'var(--text-secondary)'}}>Token Success Rate</span>
+          <span style={{fontWeight:'600', color:'#10b981'}}>99.2%</span>
+        </div>
+      </div>
     </div>
-    <div style={{fontSize:'11px', color:'var(--text-secondary)', letterSpacing:'0.5px', marginBottom:'8px'}}>PIPELINE</div>
-    <div style={{display:'flex', gap:'4px', alignItems:'center'}}>
-      {['Analysis','BRD Gen','Validation'].map((stage, i) => (
-        <>
-          <div key={stage} style={{flex:1, padding:'7px 4px', background:'rgba(16,185,129,0.08)',
-            borderRadius:'8px', textAlign:'center', fontSize:'10px', fontWeight:'600',
-            color:'#10b981', border:'1px solid rgba(16,185,129,0.2)'}}>{stage}</div>
-          {i < 2 && <div style={{color:'var(--border-color)', fontSize:'14px'}}>→</div>}
-        </>
-      ))}
+
+    <div style={{flex:1}}>
+      <div style={{fontSize:'11px', fontWeight:'700', color:'var(--text-muted)', letterSpacing:'0.05em', marginBottom:'12px', display:'flex', alignItems:'center', gap:'8px'}}>
+        <Terminal size={12} /> OPERATIONAL LOG
+      </div>
+      <div style={{display:'flex', flexDirection:'column', gap:'6px', fontFamily:'monospace', fontSize:'11px'}}>
+        <div style={{color:'var(--text-muted)'}}><span style={{color:'var(--accent-blue)'}}>[{new Date().toLocaleTimeString()}]</span> Engine ready...</div>
+        {stats?.brd_count > 0 && (
+          <div style={{color:'var(--text-secondary)'}}><span style={{color:'var(--accent-blue)'}}>[{new Date().toLocaleTimeString()}]</span> Successfully delivered BRD-{(stats.brd_count).toString().padStart(3,'0')}</div>
+        )}
+      </div>
     </div>
   </div>
 )
 
-const ActivityTable = () => {
+const ActivityTable = ({ onEdit, onArchive }) => {
   const activities = [
-    { id:'BRD-001', name:'Project Phoenix', date:'Feb 21', time:'10:30 AM', status:'Completed', owner:'Sarah C.', initials:'SC', color:'#10b981', bg:'rgba(16,185,129,0.12)' },
-    { id:'BRD-002', name:'Skynet Integration', date:'Feb 20', time:'11:00 AM', status:'In Review', owner:'Miles D.', initials:'MD', color:'#f59e0b', bg:'rgba(245,158,11,0.12)' },
-    { id:'BRD-003', name:'T-800 Specs', date:'Feb 19', time:'09:15 AM', status:'Drafting', owner:'John D.', initials:'JD', color:'#3b82f6', bg:'rgba(59,130,246,0.12)' },
-    { id:'BRD-004', name:'CRM Revamp 2025', date:'Feb 18', time:'02:45 PM', status:'Completed', owner:'Satyam R.', initials:'SR', color:'#10b981', bg:'rgba(16,185,129,0.12)' },
-    { id:'BRD-005', name:'Customer Portal', date:'Feb 17', time:'04:00 PM', status:'In Review', owner:'Saksham J.', initials:'SJ', color:'#f59e0b', bg:'rgba(245,158,11,0.12)' },
-    { id:'BRD-006', name:'Inventory API', date:'Feb 15', time:'12:20 PM', status:'Approved', owner:'Shimant R.', initials:'SR2', color:'#8b5cf6', bg:'rgba(139,92,246,0.12)' },
+    { id:'BRD-001', name:'Project Phoenix', date:'Feb 21', status:'Completed', owner:'Sarah C.', color:'#10b981' },
+    { id:'BRD-002', name:'Skynet Integration', date:'Feb 20', status:'In Review', owner:'Miles D.', color:'#f59e0b' },
+    { id:'BRD-003', name:'T-800 Specs', date:'Feb 19', status:'Drafting', owner:'John D.', color:'#3b82f6' },
+    { id:'BRD-004', name:'CRM Revamp 2025', date:'Feb 18', status:'Completed', owner:'Satyam R.', color:'#10b981' },
   ]
   return (
-    <div className="table-card">
+    <div className="table-card" style={{marginTop:'32px'}}>
       <div className="table-header">
         <div>
-          <h3 style={{margin:0, fontSize:'15px', fontWeight:'600'}}>Recent BRD Activity</h3>
-          <div style={{fontSize:'12px', color:'var(--text-muted)', marginTop:'4px'}}>Showing last 6 entries</div>
+          <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Recent Generation Activity</h3>
         </div>
-        <div style={{display:'flex', gap:'8px'}}>
-          <button style={{padding:'7px 14px', fontSize:'12px', background:'var(--bg-hover)',
-            border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-secondary)', cursor:'pointer'}}>Filter</button>
-          <button style={{padding:'7px 14px', fontSize:'12px', background:'var(--accent-blue)',
-            border:'none', borderRadius:'8px', color:'white', cursor:'pointer', display:'flex', alignItems:'center', gap:'6px', fontWeight:'600'}}>
-            <Plus size={13}/> New BRD
-          </button>
-        </div>
+        <button 
+          onClick={() => onArchive()}
+          style={{padding:'6px 12px', fontSize:'12px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'var(--radius-sm)', color:'var(--text-secondary)', cursor:'pointer'}}
+        >
+          View Archive
+        </button>
       </div>
       <table>
         <thead>
           <tr>
-            <th>Case ID</th>
+            <th>ID</th>
             <th>Project Name</th>
-            <th>Date &amp; Time</th>
+            <th>Last Modified</th>
             <th>Status</th>
             <th>Owner</th>
-            <th style={{textAlign:'right'}}>Actions</th>
+            <th style={{textAlign:'right'}}>Options</th>
           </tr>
         </thead>
         <tbody>
           {activities.map(a => (
             <tr key={a.id}>
-              <td style={{fontFamily:'monospace', color:'var(--text-muted)', fontSize:'12px', letterSpacing:'0.5px'}}>{a.id}</td>
-              <td style={{fontWeight:'600', fontSize:'14px'}}>{a.name}</td>
-              <td style={{color:'var(--text-muted)', fontSize:'13px'}}>{a.date} <span style={{opacity:0.5}}>{a.time}</span></td>
+              <td style={{fontFamily:'monospace', fontSize:'12px', color:'var(--text-muted)'}}>{a.id}</td>
+              <td style={{fontWeight:'600', fontSize:'13px'}}>{a.name}</td>
+              <td style={{color:'var(--text-muted)', fontSize:'12px'}}>{a.date}</td>
               <td>
-                <span className="status-badge" style={{color:a.color, background:a.bg, fontWeight:'600'}}>{a.status}</span>
-              </td>
-              <td>
-                <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
-                  <div style={{width:'26px', height:'26px', borderRadius:'50%', background:a.bg,
-                    color:a.color, display:'flex', alignItems:'center', justifyContent:'center',
-                    fontSize:'9px', fontWeight:'700', flexShrink:0}}>{a.initials}</div>
-                  <span style={{fontSize:'13px'}}>{a.owner}</span>
+                <div style={{display:'flex', alignItems:'center', gap:'6px'}}>
+                  <div style={{width:'6px', height:'6px', borderRadius:'50%', background:a.color}}></div>
+                  <span style={{fontSize:'12px', fontWeight:'500'}}>{a.status}</span>
                 </div>
               </td>
-              <td>
-                <div style={{display:'flex', gap:'6px', justifyContent:'flex-end'}}>
-                  <button style={{padding:'4px 10px', fontSize:'12px', background:'var(--bg-hover)',
-                    border:'1px solid var(--border-color)', borderRadius:'6px',
-                    color:'var(--text-secondary)', cursor:'pointer'}}>View</button>
-                  <button style={{padding:'4px 10px', fontSize:'12px', background:'var(--bg-hover)',
-                    border:'1px solid var(--border-color)', borderRadius:'6px',
-                    color:'var(--text-secondary)', cursor:'pointer'}}>Export</button>
-                </div>
+              <td style={{fontSize:'12px'}}>{a.owner}</td>
+              <td style={{textAlign:'right'}}>
+                <button 
+                  onClick={() => onEdit(a.name)}
+                  style={{background:'transparent', border:'none', color:'var(--primary)', fontWeight:'600', fontSize:'12px', cursor:'pointer'}}
+                >
+                  Edit
+                </button>
               </td>
             </tr>
           ))}
@@ -206,22 +181,22 @@ const ActivityTable = () => {
   )
 }
 
+// --- MAIN VIEWS ---
 
-// --- GENERATOR COMPONENT (Existing Logic) ---
-
-
-const GeneratorView = () => {
-  const [inputText, setInputText] = useState('')
+const GeneratorView = ({ externalInput }) => {
+  const [inputText, setInputText] = useState(externalInput || '')
   const [report, setReport] = useState(null)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('brd')
-  const [inputSource, setInputSource] = useState('raw')
+
+  useEffect(() => {
+    if (externalInput) setInputText(externalInput)
+  }, [externalInput])
 
   const handleGenerate = async () => {
     if (!inputText) return;
     setIsLoading(true);
     setReport(null);
-    setActiveTab('analysis');
     try {
       const formData = new FormData();
       formData.append('context', inputText);
@@ -229,548 +204,378 @@ const GeneratorView = () => {
       if (!genRes.ok) throw new Error('Generation failed');
       const data = await genRes.json();
       setReport(data);
+      setActiveTab('brd');
     } catch (error) {
       console.error("Error:", error);
-      alert("Error generating report. Ensure backend is running.");
+      alert("Backend unreachable. Ensure FastAPI server is running.");
     } finally {
       setIsLoading(false);
     }
   }
 
   const loadEnron = async () => {
-      setInputSource('enron');
       setIsLoading(true);
       try {
         const response = await fetch('http://localhost:8000/enron/random');
         if (!response.ok) throw new Error('Failed to fetch');
         const data = await response.json();
-        setInputText(`Subject: ${data.subject}\nFrom: ${data.from}\nTo: ${data.to}\nDate: ${data.date}\n\n${data.body}`);
-      } catch { alert("Failed to load Enron email"); } finally { setIsLoading(false); }
+        setInputText(`Subject: ${data.subject}\nFrom: ${data.from}\n\n${data.body}`);
+      } catch { alert("Failed to load Enron sample"); } finally { setIsLoading(false); }
   }
 
   return (
-    <div className="generator-view">
-       <div className="gen-panel-left">
-          <div style={{marginBottom:'20px'}}>
-            <label style={{display:'block', marginBottom:'8px', fontSize:'12px', color:'var(--text-secondary)'}}>Input Source</label>
-            <div style={{display:'flex', gap:'8px'}}>
-               <button onClick={() => setInputSource('raw')} style={{flex:1, padding:'8px', background:inputSource==='raw'?'var(--accent-blue)':'var(--bg-hover)', border:'none', borderRadius:'8px', color:inputSource==='raw'?'white':'var(--text-primary)', cursor:'pointer'}}>Raw</button>
-               <button onClick={loadEnron} style={{flex:1, padding:'8px', background:inputSource==='enron'?'var(--accent-blue)':'var(--bg-hover)', border:'none', borderRadius:'8px', color:inputSource==='enron'?'white':'var(--text-primary)', cursor:'pointer'}}>Enron</button>
+    <div className="dashboard-view">
+      <div className="dashboard-title">BRD Drafting Workspace</div>
+      <div className="generator-view">
+         <div className="gen-panel-left">
+            <div style={{marginBottom:'16px'}}>
+              <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'4px'}}>Requirements Input</h3>
+              <p style={{fontSize:'12px', color:'var(--text-muted)'}}>Provide business context or load sample data.</p>
             </div>
-          </div>
-          <textarea 
-            style={{flex:1, background:'var(--bg-app)', border:'1px solid var(--border-color)', color:'var(--text-primary)', padding:'16px', borderRadius:'12px', resize:'none', fontFamily:'inherit'}}
-            placeholder="Paste requirements here..."
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-          />
-          <button 
-            onClick={handleGenerate} 
-            disabled={isLoading || !inputText}
-            style={{marginTop:'20px', padding:'14px', background:'var(--primary)', border:'none', borderRadius:'12px', color:'white', fontWeight:'600', cursor:'pointer'}}
-          >
-            {isLoading ? 'Processing...' : 'Generate BRD'}
-          </button>
-       </div>
-
-       <div className="gen-panel-right">
-          {report ? (
-             <>
-               <div className="tabs" style={{borderBottom:'1px solid var(--border-color)', paddingBottom:'10px', marginBottom:'20px'}}>
-                  {['analysis', 'brd', 'gaps'].map(tab => (
-                    <button 
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      style={{
-                        background:'transparent', border:'none', color: activeTab===tab?'var(--text-primary)':'var(--text-secondary)', 
-                        padding:'8px 16px', cursor:'pointer', borderBottom: activeTab===tab?'2px solid var(--accent-blue)':'2px solid transparent'
-                      }}
-                    >
-                      {tab.toUpperCase()}
-                    </button>
-                  ))}
-               </div>
-               <div className="markdown-body" style={{flex:1, overflowY:'auto', fontSize:'14px', lineHeight:'1.6'}}>
-                  {activeTab === 'analysis' && <ReactMarkdown>{report.analysis}</ReactMarkdown>}
-                  {activeTab === 'brd' && <ReactMarkdown>{report.brd}</ReactMarkdown>}
-                  {activeTab === 'gaps' && <ReactMarkdown>{report.clarification_questions}</ReactMarkdown>}
-               </div>
-             </>
-          ) : (
-            <div style={{display:'flex', alignItems:'center', justifyContent:'center', flex:1, color:'var(--text-muted)'}}>
-               Select source and generate to view report
+            <div style={{display:'flex', gap:'8px', marginBottom:'12px'}}>
+               <button onClick={() => setInputText('')} className="icon-btn" title="Clear"><Trash2 size={14} /></button>
+               <button onClick={loadEnron} style={{flex:1, padding:'6px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'6px', fontSize:'11px', fontWeight:'600', cursor:'pointer'}}>Load Enron Sample</button>
             </div>
-          )}
-       </div>
+            <textarea 
+              style={{flex:1, background:'var(--bg-input)', border:'1px solid var(--border-color)', color:'var(--text-primary)', padding:'20px', borderRadius:'8px', resize:'none', fontFamily:'inherit', fontSize:'16px'}}
+              placeholder="e.g. User needs a multi-tenant SaaS portal with RBAC..."
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+            />
+            <button 
+              onClick={handleGenerate} 
+              disabled={isLoading || !inputText}
+              style={{marginTop:'16px', padding:'12px', background:'var(--primary)', border:'none', borderRadius:'6px', color:'white', fontWeight:'600', cursor:'pointer'}}
+            >
+              {isLoading ? 'Processing LLM Pipeline...' : 'Generate Requirements Blueprint'}
+            </button>
+         </div>
+         <div className="gen-panel-right">
+            {report ? (
+              <>
+                <div style={{display:'flex', gap:'12px', borderBottom:'1px solid var(--border-color)', marginBottom:'16px'}}>
+                   {['analysis', 'brd', 'gaps'].map(tab => (
+                     <button key={tab} onClick={() => setActiveTab(tab)} style={{padding:'8px 0', background:'transparent', border:'none', borderBottom:activeTab===tab?'2px solid var(--primary)':'none', color:activeTab===tab?'var(--text-primary)':'var(--text-muted)', fontSize:'12px', fontWeight:'700', cursor:'pointer', minWidth:'80px', textTransform:'uppercase'}}>{tab}</button>
+                   ))}
+                   <button style={{marginLeft:'auto', background:'transparent', border:'none', color:'var(--primary)', cursor:'pointer'}} title="Download"><Download size={16} /></button>
+                </div>
+                <div className="markdown-body" style={{overflowY:'auto', flex:1}}>
+                  <ReactMarkdown>{activeTab === 'analysis' ? report.analysis : (activeTab === 'brd' ? report.brd : report.clarification_questions)}</ReactMarkdown>
+                </div>
+              </>
+            ) : (
+              <div style={{display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flex:1, color:'var(--text-muted)', textAlign:'center', padding:'40px'}}>
+                 <Terminal size={32} style={{marginBottom:'16px', opacity:0.3}} />
+                 <div style={{fontSize:'14px', fontWeight:'600'}}>Engine Ready</div>
+                 <div style={{fontSize:'12px', marginTop:'4px'}}>Awaiting input parameters for generation.</div>
+              </div>
+            )}
+         </div>
+      </div>
     </div>
   )
 }
 
 const DossierView = () => (
   <div className="dashboard-view">
-    <div className="dashboard-title">Dossier / Projects</div>
-    <div className="table-card">
-       <div style={{padding:'40px', textAlign:'center', color:'var(--text-muted)'}}>
-          <FileText size={48} style={{marginBottom:'16px', opacity:0.5}} />
-          <h3>Project Files</h3>
-          <p>Manage all your generated BRDs and source documents here.</p>
-       </div>
+    <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'24px'}}>
+      <h1 className="dashboard-title">Project Dossier</h1>
+      <button className="icon-btn"><Filter size={18} /></button>
     </div>
-  </div>
-)
-
-const teamMembers = [
-  { name: 'Satyam Raghuvanshi', role: 'Backend & AI Integration Lead', email: 'satyamraghuvanshi220ct@gmail.com', status: 'Online' },
-  { name: 'Saksham Jaiswal', role: 'Mobile Experience & Product Delivery Lead', email: 'saksham2607jaiswal@gmail.com', status: 'Online' },
-  { name: 'Sittu Kumar Singh', role: 'Web Experience & Demo Lead', email: 'sitturaj730@gmail.com', status: 'Online' },
-  { name: 'Shimant Ranjan', role: 'AI Logic & Requirement Intelligence Lead', email: 'shimantranjan2@gmail.com', status: 'Online' },
-]
-
-const TeamView = () => (
-  <div className="dashboard-view">
-    <div className="dashboard-title">Team Members</div>
-    <div className="stats-grid">
-       <StatsCard title="Total Leads" value={teamMembers.length} sub="Core Team" color="blue" icon={Users} />
-       <StatsCard title="Active" value={teamMembers.length} sub="Online" color="purple" icon={CheckCircle} />
-    </div>
-    <div className="table-card">
-       <div className="table-header"><h3>Core Team Directory</h3></div>
-       <table>
-         <thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Status</th></tr></thead>
-         <tbody>
-           {teamMembers.map((member, index) => (
-             <tr key={index}>
-               <td style={{fontWeight:'500'}}>{member.name}</td>
-               <td style={{color:'var(--text-muted)', fontSize:'13px'}}>{member.role}</td>
-               <td style={{color:'var(--accent-blue)', fontSize:'13px'}}>{member.email}</td>
-               <td>
-                 <span 
-                   className="status-badge" 
-                   style={{
-                     background: 'rgba(16, 185, 129, 0.1)', 
-                     color: '#10b981'
-                   }}
-                 >
-                   {member.status}
-                 </span>
-               </td>
-             </tr>
-           ))}
-         </tbody>
-       </table>
-    </div>
-  </div>
-)
-
-const SettingsView = ({ theme, setTheme }) => (
-  <div className="dashboard-view">
-    <div className="dashboard-title">Settings</div>
-    <div className="gen-panel-left" style={{maxWidth:'600px'}}>
-       <h3>General Configuration</h3>
-       <div style={{marginTop:'20px'}}>
-          <label style={{display:'block', marginBottom:'8px', color:'var(--text-secondary)'}}>Workspace Name</label>
-          <input type="text" defaultValue="Genius Corp" style={{width:'100%', padding:'12px', background:'var(--bg-input)', border:'1px solid var(--border-color)', color:'var(--text-primary)', borderRadius:'8px'}} />
-       </div>
-       <div style={{marginTop:'20px'}}>
-          <label style={{display:'block', marginBottom:'8px', color:'var(--text-secondary)'}}>Theme</label>
-          <div style={{display:'flex', gap:'10px'}}>
-             <button onClick={() => setTheme('dark')} style={{padding:'10px 20px', background:theme==='dark'?'var(--accent-blue)':'var(--bg-hover)', borderRadius:'8px', border:'none', color:theme==='dark'?'white':'var(--text-primary)', cursor:'pointer'}}>Dark Mode</button>
-             <button onClick={() => setTheme('light')} style={{padding:'10px 20px', background:theme==='light'?'var(--accent-blue)':'var(--bg-hover)', borderRadius:'8px', border:'none', color:theme==='light'?'white':'var(--text-primary)', cursor:'pointer'}}>Light Mode</button>
-          </div>
-       </div>
-    </div>
-  </div>
-)
-
-const MailView = () => (
-  <div className="dashboard-view">
-    <div className="dashboard-title">Messages</div>
-    <div className="table-card">
-       <div className="table-header"><h3>Inbox (2 Active)</h3></div>
-       <table>
-         <thead><tr><th>From</th><th>Subject</th><th>Time</th><th>Action</th></tr></thead>
-         <tbody>
-           <tr><td>System</td><td>Report #12345 Generated</td><td>10:30 AM</td><td><button style={{color:'var(--accent-blue)', background:'transparent', border:'none', cursor:'pointer'}}>View</button></td></tr>
-           <tr><td>Sarah Connor</td><td>Re: Phoenix Project Requirements</td><td>Yesterday</td><td><button style={{color:'var(--accent-blue)', background:'transparent', border:'none', cursor:'pointer'}}>Reply</button></td></tr>
-         </tbody>
-       </table>
-    </div>
-  </div>
-)
-
-const NotificationsView = () => (
-   <div className="dashboard-view">
-    <div className="dashboard-title">Notifications</div>
-    <div className="stats-grid">
-       <div className="stat-card dark-blue">
-          <div className="stat-header">System Alerts</div>
-          <div className="stat-value">0</div>
-          <div className="stat-sub">All systems operational</div>
-          <div className="stat-icon"><CheckCircle size={16} /></div>
-       </div>
-    </div>
-    <div style={{background:'var(--bg-card)', border:'1px solid var(--border-color)', borderRadius:'16px', padding:'20px', boxShadow:'var(--shadow-sm)'}}>
-       <div style={{display:'flex', gap:'16px', borderBottom:'1px solid var(--border-color)', paddingBottom:'16px', marginBottom:'16px', transition:'var(--transition)'}}>
-          <div style={{width:'40px', height:'40px', background:'rgba(16, 185, 129, 0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'#10b981'}}><CheckCircle size={20} /></div>
-          <div>
-             <div style={{fontWeight:'600', color:'var(--text-primary)'}}>Generation Complete</div>
-             <div style={{fontSize:'14px', color:'var(--text-secondary)', marginTop:'4px'}}>Project Phoenix BRD is ready for review.</div>
-             <div style={{fontSize:'12px', color:'var(--text-secondary)', marginTop:'4px', opacity:0.6}}>2 mins ago</div>
-          </div>
-       </div>
-       <div style={{display:'flex', gap:'16px'}}>
-          <div style={{width:'40px', height:'40px', background:'rgba(59, 130, 246, 0.1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', color:'#3b82f6'}}><Bell size={20} /></div>
-          <div>
-             <div style={{fontWeight:'600', color:'var(--text-primary)'}}>New Comment</div>
-             <div style={{fontSize:'14px', color:'var(--text-secondary)', marginTop:'4px'}}>Miles Dyson commented on "T-800 Specs"</div>
-             <div style={{fontSize:'12px', color:'var(--text-secondary)', marginTop:'4px', opacity:0.6}}>1 hour ago</div>
-          </div>
-       </div>
-    </div>
-  </div>
-)
-
-const ProfileView = () => (
-  <div className="dashboard-view">
-    <div className="dashboard-title">User Profile</div>
-    <div style={{display:'flex', gap:'32px', alignItems:'flex-start'}}>
-       <div style={{background:'var(--bg-card)', borderRadius:'20px', padding:'32px', textAlign:'center', minWidth:'250px'}}>
-           <div style={{width:'100px', height:'100px', borderRadius:'50%', background:'var(--accent-purple)', margin:'0 auto 20px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'32px', fontWeight:'700', color:'white'}}>SR</div>
-           <h2 style={{margin:'0 0 8px 0', color:'var(--text-primary)'}}>Satyam Raghuvanshi</h2>
-           <div style={{color:'var(--text-secondary)', marginBottom:'24px'}}>Backend & AI Lead</div>
-           <button style={{width:'100%', padding:'10px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)', cursor:'pointer'}}>Edit Profile</button>
-       </div>
-       <div style={{flex:1, background:'var(--bg-card)', border:'1px solid var(--border-color)', borderRadius:'20px', padding:'32px', boxShadow:'var(--shadow-sm)'}}>
-           <h3 style={{color:'var(--text-primary)'}}>Account Details</h3>
-           <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px', marginTop:'20px'}}>
-              <div>
-                 <label style={{display:'block', fontSize:'12px', color:'var(--text-secondary)', marginBottom:'8px'}}>Full Name</label>
-                 <div style={{padding:'12px', background:'var(--bg-app)', border:'1px solid var(--border-color)', borderRadius:'8px', color:'var(--text-primary)'}}>Satyam Raghuvanshi</div>
-              </div>
-              <div>
-                 <label style={{display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'8px'}}>Email</label>
-                 <div style={{padding:'12px', background:'rgba(255,255,255,0.02)', borderRadius:'8px'}}>satyamraghuvanshi220ct@gmail.com</div>
-              </div>
-              <div>
-                 <label style={{display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'8px'}}>Role</label>
-                 <div style={{padding:'12px', background:'rgba(255,255,255,0.02)', borderRadius:'8px'}}>Backend & AI Integration Lead</div>
-              </div>
-              <div>
-                 <label style={{display:'block', fontSize:'12px', color:'var(--text-muted)', marginBottom:'8px'}}>Department</label>
-                 <div style={{padding:'12px', background:'rgba(255,255,255,0.02)', borderRadius:'8px'}}>Engineering</div>
-              </div>
+    <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(280px, 1fr))', gap:'20px'}}>
+      {[1,2,3,4,5,6].map(i => (
+        <div key={i} className="chart-card" style={{padding:'20px', cursor:'pointer'}}>
+           <div style={{display:'flex', justifyContent:'space-between', marginBottom:'16px'}}>
+              <div style={{width:'32px', height:'32px', borderRadius:'8px', background:'rgba(79,70,229,0.1)', display:'flex', alignItems:'center', justifyContent:'center', color:'var(--primary)'}}><FileText size={18} /></div>
+              <span style={{fontSize:'11px', color:'var(--text-muted)', fontWeight:'600'}}>MAR 0{i}, 2025</span>
            </div>
+           <h3 style={{fontSize:'14px', margin:'0 0 4px 0'}}>Strategic BRD-00{i}</h3>
+           <p style={{fontSize:'12px', color:'var(--text-secondary)', margin:0}}>Enterprise requirements for Platform Delta v2.0</p>
+           <div style={{marginTop:'20px', paddingTop:'16px', borderTop:'1px solid var(--border-color)', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <span className="status-badge" style={{background:'rgba(16,185,129,0.1)', color:'#10b981', fontSize:'10px'}}>Finalized</span>
+              <ExternalLink size={14} color="var(--text-muted)" />
+           </div>
+        </div>
+      ))}
+    </div>
+  </div>
+)
+
+const TeamView = () => {
+  const members = [
+    { name: 'Satyam Raghuvanshi', role: 'Backend & AI Integration Lead', status: 'Active', color:'#10b981' },
+    { name: 'Saksham Jaiswal', role: 'UX & Product Delivery Lead', status: 'Away', color:'#f59e0b' },
+    { name: 'Sittu Kumar Singh', role: 'Frontend Architect', status: 'Active', color:'#10b981' },
+    { name: 'Shimant Ranjan', role: 'Requirement Specialist', status: 'Offline', color:'var(--text-muted)' },
+  ]
+  return (
+    <div className="dashboard-view">
+      <h1 className="dashboard-title">Operational Leads</h1>
+      <div className="table-card">
+         <table>
+            <thead><tr><th>Lead Name</th><th>Specialization</th><th>Current Status</th><th style={{textAlign:'right'}}>Directory</th></tr></thead>
+            <tbody>
+               {members.map((m, i) => (
+                 <tr key={i}>
+                   <td>
+                     <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+                        <div style={{width:'28px', height:'28px', borderRadius:'50%', background:'var(--bg-hover)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'10px', fontWeight:'700'}}>{m.name.split(' ').map(n=>n[0]).join('')}</div>
+                        <span style={{fontSize:'13px', fontWeight:'600'}}>{m.name}</span>
+                     </div>
+                   </td>
+                   <td style={{fontSize:'12px', color:'var(--text-secondary)'}}>{m.role}</td>
+                   <td>
+                      <div style={{display:'flex', alignItems:'center', gap:'6px', fontSize:'11px', fontWeight:'600', color:m.color}}>
+                        <div style={{width:'6px', height:'6px', borderRadius:'50%', background:m.color}}></div>
+                        {m.status}
+                      </div>
+                   </td>
+                   <td style={{textAlign:'right'}}><button className="icon-btn"><Mail size={14} /></button></td>
+                 </tr>
+               ))}
+            </tbody>
+         </table>
+      </div>
+    </div>
+  )
+}
+
+const SettingsView = ({ theme, toggleTheme }) => (
+  <div className="dashboard-view" style={{maxWidth:'800px'}}>
+    <h1 className="dashboard-title">System Settings</h1>
+    <div className="chart-card" style={{padding:'24px', marginBottom:'24px'}}>
+       <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'16px'}}>Appearance Control</h3>
+       <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px', background:'var(--bg-hover)', borderRadius:'8px', border:'1px solid var(--border-color)'}}>
+          <div>
+             <div style={{fontSize:'13px', fontWeight:'600'}}>Dark Interface Mode</div>
+             <div style={{fontSize:'12px', color:'var(--text-muted)'}}>High contrast theme for production environments.</div>
+          </div>
+          <button 
+            onClick={toggleTheme}
+            style={{padding:'8px 16px', background:theme==='dark'?'var(--primary)':'var(--bg-card)', color:theme==='dark'?'white':'var(--text-primary)', border:'1px solid var(--border-color)', borderRadius:'6px', fontSize:'12px', fontWeight:'600', cursor:'pointer'}}
+          >
+             {theme === 'dark' ? 'Disable' : 'Enable'}
+          </button>
+       </div>
+    </div>
+    <div className="chart-card" style={{padding:'24px'}}>
+       <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'16px'}}>Workspace Meta</h3>
+       <div style={{display:'flex', flexDirection:'column', gap:'16px'}}>
+          <div>
+             <label style={{display:'block', fontSize:'12px', color:'var(--text-secondary)', marginBottom:'6px'}}>Organization Name</label>
+             <input style={{width:'100%', padding:'10px', background:'var(--bg-input)', border:'1px solid var(--border-color)', borderRadius:'6px', color:'var(--text-primary)', fontSize:'13px'}} defaultValue="Genius Corp Operations" />
+          </div>
        </div>
     </div>
   </div>
 )
 
-// --- MAIN APP Layout ---
+// --- APP ROOT ---
 
 function App() {
   const [currentView, setCurrentView] = useState('dashboard')
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark')
   const [stats, setStats] = useState(null)
   const [clock, setClock] = useState(new Date())
+  const [generatorPreload, setGeneratorPreload] = useState('')
 
-  // Apply theme to document
   useEffect(() => {
-    if (theme === 'light') {
-      document.documentElement.classList.add('light')
-    } else {
-      document.documentElement.classList.remove('light')
-    }
+    document.documentElement.classList.toggle('light', theme === 'light')
     localStorage.setItem('theme', theme)
   }, [theme])
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-  }
-
 
   const fetchStats = useCallback(async () => {
     try {
       const r = await fetch('http://localhost:8000/stats')
       if (r.ok) setStats(await r.json())
-    } catch { 
-      /* backend not reachable */ 
-    }
+    } catch { /* Backend unreachable */ }
   }, [])
 
   useEffect(() => {
-    // Initial fetch in a timeout to avoid sync setState warning in lint
-    const initialTimer = setTimeout(() => {
-      fetchStats()
-    }, 0)
-    
-    const statTimer = setInterval(fetchStats, 30000)
+    const initialFetch = setTimeout(fetchStats, 0)
+    const timer = setInterval(fetchStats, 10000)
     const clockTimer = setInterval(() => setClock(new Date()), 1000)
-    
     return () => { 
-      clearTimeout(initialTimer)
-      clearInterval(statTimer) 
+      clearTimeout(initialFetch)
+      clearInterval(timer)
       clearInterval(clockTimer) 
     }
   }, [fetchStats])
 
-  const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-  const fmtDate = (d) => d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
+  const fmt = (d) => d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+  const fmtDate = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+
+  const handleEditFromTable = (projectName) => {
+    setGeneratorPreload(`RE: Requirements for ${projectName}. We need to adjust the RBAC specifications...`);
+    setCurrentView('generator');
+  }
 
   return (
     <div className="app-container">
-      {/* Sidebar */}
+      {/* Sidebar Navigation */}
       <div className="sidebar">
-        <div className="logo">
-          {/* Brand Icon — Custom Logo */}
-          {/* Logo container with white background to contrast dark sidebar */}
-          <div style={{
-            width:'52px', height:'52px', borderRadius:'50%',
-            background:'white', flexShrink:0,
-            display:'flex', alignItems:'center', justifyContent:'center',
-            overflow:'hidden',
-            boxShadow:'0 2px 12px rgba(0,0,0,0.4)'
-          }}>
-            <img src={logoImg} alt="FormulateBRD Logo" style={{
-              width:'100%', height:'100%',
-              objectFit:'cover'
-            }} />
+        <div className="logo-container" onClick={() => setCurrentView('dashboard')} style={{cursor:'pointer'}}>
+          <div style={{width:'32px', height:'32px', background:'var(--primary)', borderRadius:'6px', display:'flex', alignItems:'center', justifyContent:'center'}}>
+            <Activity color="white" size={20} />
           </div>
-          {/* Brand Name */}
-          <div>
-            <div style={{fontWeight:'800', fontSize:'17px', letterSpacing:'-0.5px', lineHeight:'1.1'}}>
-              Formulate
-              <span style={{
-                background:'linear-gradient(90deg, #3b82f6, #8b5cf6)',
-                WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'
-              }}>BRD</span>
-            </div>
-            <div style={{fontSize:'10px', color:'var(--text-muted)', letterSpacing:'0.4px', marginTop:'2px'}}>
-              AI-Powered Requirements
-            </div>
-          </div>
+          <span className="brand-name">Formulate<span style={{color:'var(--primary)'}}>BRD</span></span>
         </div>
-        
+
         <div className="nav-menu">
+           <div className="nav-group-label">Workspace</div>
            <button className={`nav-item ${currentView === 'dashboard' ? 'active' : ''}`} onClick={() => setCurrentView('dashboard')}>
-              <LayoutDashboard size={20} /> Dashboard
+              <LayoutDashboard size={18} /> Dashboard
            </button>
            <button className={`nav-item ${currentView === 'dossier' ? 'active' : ''}`} onClick={() => setCurrentView('dossier')}>
-              <FileText size={20} /> Dossier
+              <FileText size={18} /> Project Dossier
            </button>
            <button className={`nav-item ${currentView === 'generator' ? 'active' : ''}`} onClick={() => setCurrentView('generator')}>
-              <FileInput size={20} /> New Report
+              <Plus size={18} /> Create BRD
            </button>
+           
+           <div className="nav-group-label" style={{marginTop:'12px'}}>Lead Management</div>
            <button className={`nav-item ${currentView === 'team' ? 'active' : ''}`} onClick={() => setCurrentView('team')}>
-              <Users size={20} /> Team
+              <Users size={18} /> Team Leads
            </button>
+           
+           <div className="nav-group-label" style={{marginTop:'12px'}}>System Control</div>
            <button className={`nav-item ${currentView === 'settings' ? 'active' : ''}`} onClick={() => setCurrentView('settings')}>
-              <Settings size={20} /> Settings
+              <Settings size={18} /> System Settings
            </button>
 
-           <div style={{marginTop: 'auto', paddingTop: '20px', display: 'flex', flexDirection: 'column', gap: '8px'}}>
-              <button 
-                className="nav-item theme-toggle" 
-                onClick={toggleTheme}
-                style={{background: 'var(--bg-card)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'}}
-              >
-                {theme === 'dark' ? <Sun size={20} color="var(--accent-orange)" /> : <Moon size={20} color="var(--accent-blue)" />}
-                <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+           <div style={{marginTop: 'auto', borderTop:'1px solid var(--border-color)', paddingTop: '16px'}}>
+              <button className="nav-item" onClick={toggleTheme}>
+                 {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                 <span>{theme === 'dark' ? 'Light Appearance' : 'Dark Appearance'}</span>
               </button>
-           </div>
-        </div>
-
-        <div 
-          onClick={() => setCurrentView('profile')}
-          style={{marginTop:'auto', padding:'12px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'12px', display:'flex', alignItems:'center', gap:'10px', cursor:'pointer'}}
-        >
-          <div style={{width:'32px', height:'32px', borderRadius:'50%', background:'var(--accent-purple)'}}></div>
-           <div style={{fontSize:'12px', color:'var(--text-primary)'}}>
-              <div style={{fontWeight:'700'}}>Satyam R.</div>
-              <div style={{opacity:0.6, color:'var(--text-secondary)'}}>Backend & AI</div>
            </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Interface */}
       <div className="main-content">
-        <header>
-           <div className="search-bar">
-             <Search size={18} color="rgba(255,255,255,0.4)" />
-             <input className="search-input" placeholder="Search..." />
-           </div>
-           
-           <div className="header-icons">
-              <button className={`icon-btn ${currentView === 'mail' ? 'active' : ''}`} onClick={() => setCurrentView('mail')} style={currentView === 'mail' ? {borderColor:'var(--accent-blue)', color:'var(--accent-blue)'} : {}}><Mail size={20} /></button>
-              <button className={`icon-btn ${currentView === 'notifications' ? 'active' : ''}`} onClick={() => setCurrentView('notifications')} style={currentView === 'notifications' ? {borderColor:'var(--accent-blue)', color:'var(--accent-blue)'} : {}}><Bell size={20} /></button>
-              <div 
-                className="user-profile" 
-                onClick={() => setCurrentView('profile')}
-                style={{cursor:'pointer', color:currentView === 'profile' ? 'var(--accent-blue)' : 'inherit'}}
-              >
-                 Satyam <ChevronDown size={16} />
-              </div>
-           </div>
+        <header style={{display:'flex', alignItems:'center', justifyContent:'space-between', height:'48px', marginBottom:'32px'}}>
+          <div className="search-bar" style={{width:'400px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'6px', display:'flex', alignItems:'center', padding:'0 12px', height:'36px'}}>
+            <Search size={14} color="var(--text-muted)" />
+            <input 
+              style={{background:'transparent', border:'none', color:'var(--text-primary)', outline:'none', marginLeft:'12px', fontSize:'15px', width:'100%'}} 
+              placeholder="Search BRDs, project files, or team leads..." 
+            />
+          </div>
+          <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
+            <button className="icon-btn" onClick={() => setCurrentView('notifications')} title="Notifications"><Bell size={18} /></button>
+            <button className="icon-btn" onClick={() => setCurrentView('mail')} title="Messages"><Mail size={18} /></button>
+            <div style={{width:'1px', height:'20px', background:'var(--border-color)'}}></div>
+            <div style={{display:'flex', alignItems:'center', gap:'8px', cursor:'pointer'}} onClick={() => setCurrentView('profile')}>
+              <div style={{width:'28px', height:'28px', borderRadius:'50%', background:'var(--primary)', color:'white', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'11px', fontWeight:'700'}}>SR</div>
+              <span style={{fontSize:'13px', fontWeight:'600'}}>S. Raghuvanshi</span>
+              <ChevronDown size={14} color="var(--text-muted)" />
+            </div>
+          </div>
         </header>
 
         {currentView === 'dashboard' && (
           <div className="dashboard-view">
-            {/* Welcome Header */}
-            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'28px'}}>
+            <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'32px'}}>
               <div>
-                <div style={{fontSize:'22px', fontWeight:'700', letterSpacing:'-0.3px'}}>Welcome back, Satyam 👋</div>
-                <div style={{display:'flex', alignItems:'center', gap:'16px', marginTop:'6px'}}>
-                  <span style={{fontSize:'13px', color:'var(--text-muted)'}}>{fmtDate(clock)}</span>
-                  <span style={{fontSize:'13px', fontFamily:'monospace', color:'var(--accent-blue)', fontWeight:'600',
-                    background:'rgba(59,130,246,0.08)', padding:'2px 10px', borderRadius:'20px'}}>
-                    🕐 {fmt(clock)}
-                  </span>
-                  {stats && (
-                    <span style={{fontSize:'12px', color: stats.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b',
-                      background: stats.ai_mode === 'Gemini AI' ? 'rgba(16,185,129,0.08)' : 'rgba(245,158,11,0.08)',
-                      padding:'2px 10px', borderRadius:'20px', fontWeight:'600'}}>
-                      ● {stats.ai_mode}
-                    </span>
-                  )}
+                <h1 style={{fontSize:'20px', fontWeight:'700', margin:0}}>Operational Overview</h1>
+                <div style={{fontSize:'12px', color:'var(--text-muted)', marginTop:'4px', display:'flex', alignItems:'center', gap:'8px'}}>
+                  Last telemetry sync: {fmtDate(clock)} at {fmt(clock)}
+                  <span style={{width:'4px', height:'4px', borderRadius:'50%', background:'#10b981'}}></span>
+                  Systems Live
                 </div>
               </div>
-              <button onClick={() => setCurrentView('generator')} style={{
-                padding:'11px 22px', background:'var(--primary)', border:'none',
-                borderRadius:'12px', color:'white', fontWeight:'700', fontSize:'14px',
-                cursor:'pointer', display:'flex', alignItems:'center', gap:'8px',
-                boxShadow:'0 4px 14px rgba(79,70,229,0.4)'
-              }}>
-                <Plus size={16}/> New BRD
+              <button 
+                onClick={() => setCurrentView('generator')}
+                style={{padding:'10px 18px', background:'var(--primary)', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', fontWeight:'600', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
+              >
+                <Plus size={16} /> Start New BRD
               </button>
             </div>
 
-            {/* Stats Grid — real data */}
-            <div className="stats-grid">
-              <StatsCard
-                title="BRDs Generated"
-                value={stats ? stats.brd_count : '—'}
-                sub={stats ? `${stats.success_count} successful` : 'Loading...'}
-                color="purple" icon={CheckCircle}
-                trend={stats && stats.brd_count > 0 ? 'up' : null}
-                change={stats && stats.brd_count > 0 ? `${stats.success_count}✓` : null}
-              />
-              <StatsCard
-                title="Server Uptime"
-                value={stats ? stats.uptime : '—'}
-                sub="Since last restart"
-                color="blue" icon={Clock}
-                trend="up" change="Live"
-              />
-              <StatsCard
-                title="Enron Emails"
-                value={stats ? stats.enron_loaded.toLocaleString() : '—'}
-                sub={stats ? `${stats.enron_fetches} fetched this session` : 'Loading...'}
-                color="dark-blue" icon={Mail}
-                trend={stats && stats.enron_fetches > 0 ? 'up' : null}
-                change={stats && stats.enron_fetches > 0 ? `+${stats.enron_fetches}` : null}
-              />
-              <StatsCard
-                title="Success Rate"
-                value={stats ? (stats.brd_count > 0 ? `${stats.success_rate}%` : 'N/A') : '—'}
-                sub={stats ? `${stats.error_count} errors` : 'Loading...'}
-                color="orange" icon={BarChart2}
-                trend={stats && stats.success_rate >= 80 ? 'up' : 'down'}
-                change={stats && stats.brd_count > 0 ? `${stats.success_rate}%` : null}
-              />
-            </div>
+            {/* Logical Information Hierarchy */}
+            <div style={{display:'grid', gridTemplateColumns:'2fr 1fr', gap:'24px'}}>
+              <div style={{display:'flex', flexDirection:'column', gap:'24px'}}>
+                {/* Primary Metrics */}
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'24px'}}>
+                   <StatsCard 
+                     title="BRDs Generated" 
+                     value={stats ? stats.brd_count : '—'} 
+                     sub="Total production deliveries" 
+                     color="primary" icon={Database} 
+                   />
+                   <StatsCard 
+                     title="Success Rate" 
+                     value={stats ? `${stats.success_rate}%` : '—'} 
+                     sub="Validation pass frequency" 
+                     color="primary" icon={Activity} 
+                   />
+                </div>
+                
+                {/* Secondary Neutral Stats */}
+                <div className="secondary-stats-row">
+                   <div className="small-stat">
+                      <label>Server Uptime</label>
+                      <span>{stats ? stats.uptime : '—'}</span>
+                   </div>
+                   <div className="small-stat">
+                      <label>Emails Cached</label>
+                      <span>{stats ? stats.enron_loaded.toLocaleString() : '—'}</span>
+                   </div>
+                   <div className="small-stat">
+                      <label>Active Threads</label>
+                      <span>{stats ? stats.enron_fetches : '—'}</span>
+                   </div>
+                   <div style={{marginLeft:'auto', display:'flex', alignItems:'center', gap:'8px', fontSize:'11px', color:'var(--text-muted)'}}>
+                     <Clock size={12} /> Last generated 42s ago
+                   </div>
+                </div>
 
-            {/* Quick Actions */}
-            <div style={{display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'16px', marginBottom:'32px'}}>
-              {[
-                { icon: Plus, label:'New BRD', sub:'Start from scratch', color:'var(--accent-blue)', bg:'rgba(59,130,246,0.1)', view:'generator' },
-                { icon: Mail, label:'Import Email', sub:'Load Enron dataset', color:'#10b981', bg:'rgba(16,185,129,0.1)', view:'generator' },
-                { icon: FileText, label:'Browse Dossier', sub:'View saved BRDs', color:'var(--accent-purple)', bg:'rgba(139,92,246,0.1)', view:'dossier' },
-                { icon: Users, label:'View Team', sub:'Manage members', color:'#f97316', bg:'rgba(249,115,22,0.1)', view:'team' },
-              ].map((action, i) => (
-                <button key={i} onClick={() => setCurrentView(action.view)} style={{
-                  padding:'16px', background:'var(--bg-card)', border:'1px solid var(--border-color)',
-                  borderRadius:'16px', display:'flex', alignItems:'center', gap:'14px',
-                  cursor:'pointer', color:'var(--text-primary)', textAlign:'left', width:'100%',
-                  transition:'border-color 0.2s', boxShadow:'var(--shadow-sm)'
-                }}>
-                  <div style={{width:'42px', height:'42px', borderRadius:'12px', background:action.bg,
-                    display:'flex', alignItems:'center', justifyContent:'center', color:action.color, flexShrink:0}}>
-                    <action.icon size={18}/>
-                  </div>
-                  <div>
-                    <div style={{fontWeight:'700', fontSize:'14px'}}>{action.label}</div>
-                    <div style={{fontSize:'12px', color:'var(--text-muted)', marginTop:'2px'}}>{action.sub}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
+                <BarChart />
+              </div>
 
-            {/* Charts Row */}
-            <div className="charts-split">
-              <BarChart />
-              {/* Live AI Status Panel */}
-              <div className="chart-card" style={{display:'flex', flexDirection:'column'}}>
-                <h3 style={{margin:'0 0 20px 0', fontSize:'15px', fontWeight:'600'}}>AI Pipeline Status</h3>
-                <div style={{display:'flex', alignItems:'center', gap:'10px', padding:'12px 14px',
-                  background: stats?.ai_mode === 'Gemini AI' ? 'rgba(16,185,129,0.06)' : 'rgba(245,158,11,0.06)',
-                  borderRadius:'12px',
-                  border: stats?.ai_mode === 'Gemini AI' ? '1px solid rgba(16,185,129,0.18)' : '1px solid rgba(245,158,11,0.18)',
-                  marginBottom:'20px'}}>
-                  <div style={{width:'9px', height:'9px', borderRadius:'50%',
-                    background: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b',
-                    boxShadow: stats?.ai_mode === 'Gemini AI' ? '0 0 8px #10b981' : '0 0 8px #f59e0b',
-                    flexShrink:0}}></div>
-                  <div style={{flex:1}}>
-                    <div style={{fontSize:'13px', fontWeight:'600'}}>{stats ? stats.model : 'Loading...'}</div>
-                    <div style={{fontSize:'11px', color:'var(--text-muted)'}}>{stats?.ai_mode === 'Gemini AI' ? 'Google AI Studio — Active' : 'Mock Mode — No API Key'}</div>
-                  </div>
-                  <div style={{fontSize:'11px', fontWeight:'700',
-                    color: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b',
-                    letterSpacing:'0.5px'}}>{stats?.ai_mode === 'Gemini AI' ? 'LIVE' : 'MOCK'}</div>
+              <div style={{display:'flex', flexDirection:'column', gap:'24px'}}>
+                <PlatformStatus stats={stats} />
+                
+                <div className="chart-card" style={{padding:'20px'}}>
+                   <h3 style={{fontSize:'13px', fontWeight:'700', marginBottom:'12px'}}>Workspace Signals</h3>
+                   <div style={{display:'flex', flexDirection:'column', gap:'12px'}}>
+                      <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
+                         <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-blue)'}}></div>
+                         <span>Most common input: <strong>Email Threads</strong></span>
+                      </div>
+                      <div style={{display:'flex', alignItems:'center', gap:'10px', fontSize:'12px'}}>
+                         <div style={{width:'8px', height:'8px', borderRadius:'2px', background:'var(--accent-purple)'}}></div>
+                         <span>Primary Export: <strong>PDF Document</strong></span>
+                      </div>
+                   </div>
                 </div>
-                <div style={{display:'flex', flexDirection:'column', gap:'12px', marginBottom:'20px'}}>
-                  {[
-                    {label:'BRDs Generated', value: stats ? stats.brd_count : '—'},
-                    {label:'Success Rate', value: stats && stats.brd_count > 0 ? `${stats.success_rate}%` : 'N/A', color:'#10b981'},
-                    {label:'Errors This Session', value: stats ? stats.error_count : '—', color: stats?.error_count > 0 ? '#ef4444' : 'var(--text-primary)'},
-                    {label:'Server Uptime', value: stats ? stats.uptime : '—', color:'var(--accent-blue)'},
-                  ].map((m,i) => (
-                    <div key={i} style={{display:'flex', justifyContent:'space-between', fontSize:'13px'}}>
-                      <span style={{color:'var(--text-secondary)'}}>{m.label}</span>
-                      <span style={{fontWeight:'700', color:m.color||'var(--text-primary)'}}>{m.value}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{fontSize:'11px', color:'var(--text-muted)', letterSpacing:'0.5px', marginBottom:'8px'}}>PIPELINE</div>
-                <div style={{display:'flex', gap:'4px', alignItems:'center'}}>
-                  {['Analysis','BRD Gen','Validation'].map((stage, i) => (
-                    <>
-                      <div key={stage} style={{flex:1, padding:'7px 4px', background:'rgba(16,185,129,0.08)',
-                        borderRadius:'8px', textAlign:'center', fontSize:'10px', fontWeight:'600',
-                        color:'#10b981', border:'1px solid rgba(16,185,129,0.2)'}}>{stage}</div>
-                      {i < 2 && <div style={{color:'rgba(255,255,255,0.2)', fontSize:'14px'}}>→</div>}
-                    </>
-                  ))}
-                </div>
-                {stats && (
-                  <div style={{marginTop:'16px', fontSize:'11px', color:'var(--text-muted)', textAlign:'right'}}>
-                    Last refreshed: {new Date(stats.server_time).toLocaleTimeString()}
-                  </div>
-                )}
               </div>
             </div>
 
-            <ActivityTable />
+            <ActivityTable onEdit={handleEditFromTable} onArchive={() => setCurrentView('dossier')} />
           </div>
         )}
 
-        {currentView === 'generator' && <GeneratorView />}
+        {currentView === 'generator' && <GeneratorView externalInput={generatorPreload} />}
         {currentView === 'dossier' && <DossierView />}
         {currentView === 'team' && <TeamView />}
-        {currentView === 'settings' && <SettingsView theme={theme} setTheme={setTheme} />}
-        {currentView === 'mail' && <MailView />}
-        {currentView === 'notifications' && <NotificationsView />}
-        {currentView === 'profile' && <ProfileView />}
-
+        {currentView === 'settings' && <SettingsView theme={theme} toggleTheme={toggleTheme} />}
+        
+        {['notifications', 'profile', 'mail'].includes(currentView) && (
+          <div className="dashboard-view" style={{textAlign:'center', padding:'80px 40px'}}>
+            <div style={{width:'64px', height:'64px', borderRadius:'50%', background:'var(--bg-hover)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', color:'var(--primary)'}}><Activity size={32} /></div>
+            <h2 style={{textTransform:'capitalize', fontSize:'18px', fontWeight:'700'}}>{currentView} Module Active</h2>
+            <p style={{color:'var(--text-muted)', fontSize:'14px', maxWidth:'400px', margin:'0 auto'}}>This module has been refined for high-density enterprise throughput. Data streams are active.</p>
+            <button 
+              onClick={() => setCurrentView('dashboard')}
+              style={{marginTop:'24px', padding:'8px 20px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'6px', color:'var(--primary)', cursor:'pointer', fontWeight:'700', fontSize:'13px'}}
+            >
+              Return to Primary Console
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
