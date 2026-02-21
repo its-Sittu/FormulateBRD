@@ -24,7 +24,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy dataset and server source
 COPY dataset/ ./dataset/
-COPY server/ ./
+COPY server/ ./server/
 # Copy the frontend build from stage 1
 COPY --from=build-stage /app/client/dist ./client/dist
 
@@ -36,4 +36,4 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=8000
 
 # Start command
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn server.main:app --host 0.0.0.0 --port ${PORT}"]

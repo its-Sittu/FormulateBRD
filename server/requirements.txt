@@ -7,6 +7,7 @@ click==8.3.1
 colorama==0.4.6
 fastapi==0.129.0
 google-generativeai>=0.8.6
+google-genai
 h11==0.16.0
 idna==3.11
 numpy==2.4.2
