@@ -5,7 +5,6 @@ import {
   FileText, 
   Users, 
   Settings, 
-  BarChart2, 
   FileInput, 
   Search, 
   Bell, 
@@ -85,76 +84,6 @@ const StatsCard = ({ title, value, sub, color, icon: Icon }) => {
   );
 };
 
-const BarChart = ({ history = [] }) => {
-  // Drive last point from history length
-  const dynamicVal = Math.min(98, 85 + (history.length * 2));
-  const dynamicY = 140 - (dynamicVal / 100) * 120;
-
-  const points = [
-    { x: 30, y: 120, val: 65 },
-    { x: 112, y: 100, val: 78 },
-    { x: 194, y: 110, val: 72 },
-    { x: 276, y: 80, val: 84 },
-    { x: 358, y: 90, val: 80 },
-    { x: 440, y: 60, val: 92 },
-    { x: 522, y: dynamicY, val: dynamicVal }
-  ]
-  const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb']
-  const pathData = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
-  const areaData = `${pathData} L 522 140 L 30 140 Z`
-
-  return (
-    <div className="chart-card" style={{padding:'24px'}}>
-      <div style={{display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'20px'}}>
-        <div>
-          <h3 style={{margin:0, fontSize:'14px', fontWeight:'700'}}>Semantic Precision Index</h3>
-          <p style={{margin:'4px 0 0 0', fontSize:'12px', color:'var(--text-muted)'}}>Historical trend of AI-driven requirement validation accuracy</p>
-        </div>
-        <div style={{display:'flex', alignItems:'center', gap:'6px', background:'rgba(16,185,129,0.1)', color:'#10b981', padding:'2px 8px', borderRadius:'100px', fontSize:'10px', fontWeight:'700'}}>
-          <div className="pulse-dot"></div> LIVE TELEMETRY
-        </div>
-      </div>
-      <svg viewBox="0 0 540 160" width="100%" height="160">
-        {[0,50,100].map((v,i) => {
-          const y = 140 - (v/100)*120
-          return <g key={i}>
-            <line x1="30" y1={y} x2="540" y2={y} stroke="var(--border-color)" strokeWidth="1" strokeDasharray="4 4"/>
-            <text x="24" y={y+4} fill="var(--text-muted)" fontSize="10" textAnchor="end">{v}%</text>
-          </g>
-        })}
-        <path d={areaData} fill="url(#chartGradient)" opacity="0.15" />
-        <path d={pathData} fill="none" stroke="var(--primary)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-        {points.map((p, i) => {
-          const isLast = i === points.length - 1;
-          return (
-            <g key={i}>
-              <circle 
-                cx={p.x} 
-                cy={p.y} 
-                r={isLast ? "5" : "4"} 
-                fill={isLast ? "var(--primary)" : "var(--bg-card)"} 
-                stroke="var(--primary)" 
-                strokeWidth="2" 
-                className={isLast ? "pulse-node" : ""}
-              />
-              <text x={p.x} y="158" fill="var(--text-muted)" fontSize="10" textAnchor="middle">{months[i]}</text>
-            </g>
-          );
-        })}
-        <defs>
-          <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--primary)" />
-            <stop offset="100%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div style={{display:'flex', gap:'16px', marginTop:'16px', fontSize:'11px', color:'var(--text-secondary)'}}>
-        <div style={{display:'flex', alignItems:'center', gap:'6px'}}><div style={{width:'8px', height:'2px', background:'var(--primary)'}}></div> Accuracy Trend</div>
-        <div style={{marginLeft:'auto', fontWeight:'600', color:'var(--primary)'}}>Current: {dynamicVal.toFixed(1)}%</div>
-      </div>
-    </div>
-  )
-}
 
 const PlatformStatus = ({ stats }) => (
   <div className="chart-card" style={{padding:'24px', display:'flex', flexDirection:'column'}}>
@@ -735,7 +664,6 @@ function App() {
                    </div>
                 </div>
 
-                <BarChart history={brdHistory} />
               </div>
 
               <div style={{display:'flex', flexDirection:'column', gap:'24px'}}>
