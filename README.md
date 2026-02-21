@@ -1,8 +1,7 @@
-##  FormulateBRD: An agentic Business Analyst
 
+## FormulateBRD - An agentic Business Analyst
 
 FormulateBRD is an AI-powered Business Requirements Document generation tool designed to bridge the gap between unstructured business communication and structured software requirements. Business ideas are often shared through emails, chats, and meeting notes, leading to ambiguity, misalignment, and costly rework. FormulateBRD uses a constrained AI Business Analyst workflow to analyze inputs, generate enterprise-ready BRDs, and validate gaps through clarification questions. The system operates in a secure, stateless, risk-free demo mode, focusing on accuracy over assumptions. By bringing clarity before development begins, FormulateBRD reduces delays, improves stakeholder alignment, and accelerates project kick-off across teams
-
 
 A modern, AI-powered Business Requirements Document (BRD) generator with an enterprise-grade dashboard, Enron dataset integration, and a mock 3-stage prompt engineering pipeline.
 
