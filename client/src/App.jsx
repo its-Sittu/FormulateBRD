@@ -7,7 +7,6 @@ import {
   Settings, 
   FileInput, 
   Search, 
-  Bell, 
   Mail, 
   Plus,
   CheckCircle,
@@ -171,6 +170,28 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
   const [report, setReport] = useState(initialReport || null)
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('brd')
+  const [feedbackText, setFeedbackText] = useState('')
+
+  const handleRefine = async () => {
+    if (!feedbackText || !report) return;
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('original_report', report.brd);
+      formData.append('feedback', feedbackText);
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/refine`, { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Refinement failed');
+      const data = await res.json();
+      setReport(data);
+      setFeedbackText('');
+      if (onSave) onSave(data);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Refinement failed. Ensure backend is running.");
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (externalInput) setInputText(externalInput)
@@ -277,6 +298,25 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
                 </div>
                 <div className="markdown-body" style={{overflowY:'auto', flex:1}}>
                   <ReactMarkdown>{activeTab === 'analysis' ? report.analysis : (activeTab === 'brd' ? report.brd : report.clarification_questions)}</ReactMarkdown>
+                </div>
+                <div style={{marginTop:'20px', paddingTop:'16px', borderTop:'1px solid var(--border-color)'}}>
+                   <div style={{fontSize:'12px', fontWeight:'700', marginBottom:'8px', color:'var(--primary)'}}>REFINEMENT CANVAS — PROVIDE FEEDBACK TO ALTER BRD</div>
+                   <div style={{display:'flex', gap:'10px'}}>
+                      <input 
+                        style={{flex:1, background:'var(--bg-input)', border:'1px solid var(--border-color)', color:'var(--text-primary)', padding:'10px', borderRadius:'6px', fontSize:'13px'}}
+                        placeholder="e.g. Add a section for mobile responsiveness or change the target user to Stakeholders..."
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleRefine()}
+                      />
+                      <button 
+                        onClick={handleRefine}
+                        disabled={isLoading || !feedbackText}
+                        style={{padding:'0 20px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'6px', color:'var(--text-primary)', fontWeight:'700', fontSize:'12px', cursor:'pointer'}}
+                      >
+                         Refine
+                      </button>
+                   </div>
                 </div>
               </>
             ) : (
@@ -552,7 +592,11 @@ function App() {
            <button className={`nav-item ${currentView === 'dossier' ? 'active' : ''}`} onClick={() => setCurrentView('dossier')}>
               <FileText size={18} /> Project Dossier
            </button>
-           <button className={`nav-item ${currentView === 'generator' ? 'active' : ''}`} onClick={() => setCurrentView('generator')}>
+           <button className={`nav-item ${currentView === 'generator' ? 'active' : ''}`} onClick={() => {
+              setGeneratorPreload('');
+              setSelectedReport(null);
+              setCurrentView('generator');
+           }}>
               <Plus size={18} /> Create BRD
            </button>
            
@@ -585,9 +629,6 @@ function App() {
               placeholder="Search BRDs, project files, or team leads..." 
             />
           </div>
-          <div style={{display:'flex', alignItems:'center', gap:'12px'}}>
-            <button className="icon-btn" onClick={() => setCurrentView('notifications')} title="Notifications"><Bell size={18} /></button>
-          </div>
         </header>
 
         {currentView === 'dashboard' && (
@@ -602,7 +643,11 @@ function App() {
                 </div>
               </div>
               <button 
-                onClick={() => setCurrentView('generator')}
+                onClick={() => {
+                  setGeneratorPreload('');
+                  setSelectedReport(null);
+                  setCurrentView('generator');
+                }}
                 style={{padding:'10px 18px', background:'var(--primary)', color:'white', border:'none', borderRadius:'6px', fontSize:'13px', fontWeight:'600', cursor:'pointer', display:'flex', alignItems:'center', gap:'8px'}}
               >
                 <Plus size={16} /> New Project
@@ -615,15 +660,15 @@ function App() {
                 {/* Primary Metrics */}
                 <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:'24px'}}>
                    <StatsCard 
-                     title="BRDs Generated" 
-                     value={brdHistory.length} 
-                     sub="Total items in dossier" 
+                     title="Global BRDs Generated" 
+                     value={stats ? stats.brd_count : '—'} 
+                     sub="Total engine throughput" 
                      color="primary" icon={Database} 
                    />
                    <StatsCard 
-                     title="Success Rate" 
-                     value={`${Math.min(99.8, 92.4 + (brdHistory.length * 0.8)).toFixed(1)}%`} 
-                     sub="Real-time validation quality" 
+                     title="Avg Success Rate" 
+                     value={stats ? `${stats.success_rate}%` : '—'} 
+                     sub="Global validation baseline" 
                      color="primary" icon={Activity} 
                    />
                 </div>
@@ -710,7 +755,7 @@ function App() {
         {currentView === 'team' && <TeamView user={user} />}
         {currentView === 'settings' && <SettingsView theme={theme} toggleTheme={toggleTheme} user={user} setUser={setUser} />}
         
-        {['notifications', 'mail'].includes(currentView) && (
+        {currentView === 'mail' && (
           <div className="dashboard-view" style={{textAlign:'center', padding:'80px 40px'}}>
             <div style={{width:'64px', height:'64px', borderRadius:'50%', background:'var(--bg-hover)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px', color:'var(--primary)'}}><Activity size={32} /></div>
             <h2 style={{textTransform:'capitalize', fontSize:'18px', fontWeight:'700'}}>{currentView} Module Active</h2>

@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 load_dotenv(dotenv_path=_env_path, override=True)
 
-from prompts import ANALYSIS_SYSTEM_PROMPT, BRD_GENERATION_PROMPT, GAP_ANALYSIS_PROMPT
+from prompts import ANALYSIS_SYSTEM_PROMPT, BRD_GENERATION_PROMPT, GAP_ANALYSIS_PROMPT, REFINEMENT_PROMPT
 
 app = FastAPI()
 
@@ -214,6 +214,31 @@ async def generate_brd(context: str = Form(...)):
             report = generate_with_real_llm(context)
         else:
             report = generate_with_mock(context)
+        SESSION_STATS["success_count"] += 1
+        return report
+    except Exception as e:
+        SESSION_STATS["error_count"] += 1
+        raise e
+
+@app.post("/refine")
+async def refine_brd(original_report: str = Form(...), feedback: str = Form(...)):
+    """Refine an existing BRD based on feedback."""
+    SESSION_STATS["brd_count"] += 1
+    try:
+        if USE_REAL_LLM:
+            prompt = REFINEMENT_PROMPT.format(original_report=original_report, feedback=feedback)
+            refined_content = call_gemini(prompt)
+            # For simplicity in refinement, we return the same structure but updated
+            # Ideally we'd re-run analysis, but for 'modifying', updating the BRD is key
+            report = {
+                "analysis": "Analysis updated for refinement.",
+                "brd": refined_content,
+                "clarification_questions": "Validation updated for refinement."
+            }
+        else:
+            report = generate_with_mock(f"REFINED: {feedback}")
+            report["brd"] = f"### REFINED VERSION\n\n{report['brd']}"
+        
         SESSION_STATS["success_count"] += 1
         return report
     except Exception as e:
