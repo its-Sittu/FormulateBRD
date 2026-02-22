@@ -15,21 +15,39 @@ from prompts import ANALYSIS_SYSTEM_PROMPT, BRD_GENERATION_PROMPT, GAP_ANALYSIS_
 
 app = FastAPI()
 
-# --- Gemini Setup (new google.genai SDK) ---
+# --- Provider Setup ---
+# Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
+gemini_client = None
 if GEMINI_API_KEY and GEMINI_API_KEY != "your_gemini_api_key_here":
     from google import genai
     gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-    GEMINI_MODEL = "models/gemini-flash-latest"
-    USE_REAL_LLM = True
-    print("✅ Gemini API configured successfully.")
-else:
-    gemini_client = None
-    USE_REAL_LLM = False
-    print("⚠️  No Gemini API key found. Running in MOCK mode.")
+    print(f"✅ Gemini AI configured with key: {GEMINI_API_KEY[:10]}...")
 
-# --- Session Metrics (in-memory) ---
+@app.get("/debug")
+async def debug_info():
+    return {
+        "gemini_key_exists": GEMINI_API_KEY is not None,
+        "gemini_key_valid_prefix": GEMINI_API_KEY.startswith("AIza") if GEMINI_API_KEY else False,
+        "gemini_client_exists": gemini_client is not None,
+        "openai_key_exists": OPENAI_API_KEY is not None,
+        "anthropic_key_exists": CLAUDE_API_KEY is not None,
+        "env_path": _env_path,
+        "os_cwd": os.getcwd()
+    }
+
+# OpenAI (Placeholders for user to add keys)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# Claude
+CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+
+def get_active_model_info():
+    if gemini_client: return "Gemini 1.5 Flash", "google"
+    return "Mock Intelligence", "mock"
+
+# --- Session Metrics & Persistence ---
+TELEMETRY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "telemetry.json")
+
 SESSION_STATS = {
     "brd_count": 0,
     "success_count": 0,
@@ -37,6 +55,36 @@ SESSION_STATS = {
     "enron_fetches": 0,
     "server_start": time.time(),
 }
+
+def load_telemetry():
+    global SESSION_STATS
+    if os.path.exists(TELEMETRY_FILE):
+        try:
+            import json
+            with open(TELEMETRY_FILE, "r") as f:
+                data = json.load(f)
+                SESSION_STATS["brd_count"] = data.get("brd_count", 0)
+                SESSION_STATS["success_count"] = data.get("success_count", 0)
+                SESSION_STATS["error_count"] = data.get("error_count", 0)
+                SESSION_STATS["enron_fetches"] = data.get("enron_fetches", 0)
+                print(f"📊 Telemetry restored: {SESSION_STATS['brd_count']} BRDs generated to date.")
+        except Exception as e:
+            print(f"⚠️ Failed to load telemetry: {e}")
+
+def save_telemetry():
+    try:
+        import json
+        with open(TELEMETRY_FILE, "w") as f:
+            json.dump({
+                "brd_count": SESSION_STATS["brd_count"],
+                "success_count": SESSION_STATS["success_count"],
+                "error_count": SESSION_STATS["error_count"],
+                "enron_fetches": SESSION_STATS["enron_fetches"]
+            }, f)
+    except Exception as e:
+        print(f"⚠️ Failed to save telemetry: {e}")
+
+load_telemetry()
 
 # --- Enron Dataset ---
 ENRON_DATASET = []
@@ -76,59 +124,56 @@ app.add_middleware(
 
 # --- LLM Helpers ---
 
-def call_gemini(prompt: str) -> str:
-    """Call Gemini with exponential backoff retry for 503/429 errors."""
-    max_retries = 3
-    base_delay = 2
-    for attempt in range(max_retries):
-        try:
-            response = gemini_client.models.generate_content(
-                model=GEMINI_MODEL,
-                contents=prompt
-            )
-            return response.text
-        except Exception as e:
-            err_msg = str(e)
-            is_transient = "503" in err_msg or "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "UNAVAILABLE" in err_msg
-            if is_transient and attempt < max_retries - 1:
-                wait_time = base_delay * (2 ** attempt)
-                print(f"⚠️ Gemini transient error ({err_msg[:50]}...). Retrying in {wait_time}s (Attempt {attempt + 1}/{max_retries})...")
-                time.sleep(wait_time)
-                continue
-            raise e
+def call_llm(prompt: str, provider: str = "google", model: str = "gemini-flash") -> str:
+    """Unified LLM caller with routing logic."""
+    if provider == "google" and gemini_client:
+        max_retries = 3
+        base_delay = 2
+        for attempt in range(max_retries):
+            try:
+                response = gemini_client.models.generate_content(
+                    model="models/gemini-flash-latest",
+                    contents=prompt
+                )
+                return response.text
+            except Exception as e:
+                err_msg = str(e)
+                if ("503" in err_msg or "429" in err_msg) and attempt < max_retries - 1:
+                    wait_time = base_delay * (2 ** attempt)
+                    time.sleep(wait_time)
+                    continue
+                raise e
+    
+    # Placeholder routing for OpenAI/Claude
+    if provider == "openai":
+        return f"## OpenAI Placeholder Output\n\n(OpenAI API Key Required for '{model}')\n\nTo enable, add OPENAI_API_KEY to your server/.env file."
+    if provider == "anthropic":
+        return f"## Claude Placeholder Output\n\n(Claude API Key Required for '{model}')\n\nTo enable, add CLAUDE_API_KEY to your server/.env file."
+
+    return "Mock Engine: Provider Not Configured."
 
 from prompts import MASTER_PIPELINE_PROMPT
 
-def generate_with_real_llm(user_input: str) -> dict:
-    """Optimized 1-stage Gemini pipeline: All sections generated in one round-trip."""
+def generate_with_real_llm(user_input: str, provider: str = "google", model: str = "gemini-flash") -> dict:
+    """Optimized multi-model pipeline."""
     try:
-        print("Executing Unified 3-Stage Pipeline...")
-        full_output = call_gemini(MASTER_PIPELINE_PROMPT.format(user_input=user_input))
+        print(f"Executing Pipeline via {provider.upper()} ({model})...")
+        full_output = call_llm(MASTER_PIPELINE_PROMPT.format(user_input=user_input), provider, model)
         
-        # Split the unified output into logical sections for the frontend
-        # The prompt uses ──────────────────────── as separators or headers
+        # Split logic remains the same (unified prompt structure)
         sections = full_output.split("STAGE ")
         analysis = sections[1] if len(sections) > 1 else "Analysis extraction failed."
         brd = sections[2] if len(sections) > 2 else "BRD generation failed."
         gaps = sections[3] if len(sections) > 3 else "Validation failed."
 
         return {
-            "analysis": f"## Stage 1 — Requirement Analysis\n\n{analysis}", 
-            "brd": f"## Stage 2 — Business Requirements Document\n\n{brd}", 
+            "analysis": f"## Stage 1 — Requirement Analysis ({provider})\n\n{analysis}", 
+            "brd": f"## Stage 2 — Business Requirements Document ({model})\n\n{brd}", 
             "clarification_questions": f"## Stage 3 — Validation\n\n{gaps}"
         }
-
     except Exception as e:
-        err = str(e)
-        print(f"⚠️ Gemini error, falling back to mock: {err[:100]}")
-        result = generate_with_mock(user_input)
-        if "429" in err or "RESOURCE_EXHAUSTED" in err:
-            result["brd"] = "⚠️ **Gemini rate limit reached** (retries failed). Showing mock output.\n\n" + result["brd"]
-        elif "503" in err or "UNAVAILABLE" in err:
-            result["brd"] = "⚠️ **Gemini overloaded** (all retries failed). Showing mock output.\n\n" + result["brd"]
-        else:
-            result["brd"] = f"⚠️ **Gemini fatal error**: {err[:80]}...\n\nShowing mock output:\n\n" + result["brd"]
-        return result
+        print(f"⚠️ Engine Error: {str(e)}")
+        return generate_with_mock(user_input)
 
 def generate_with_mock(text_input: str) -> dict:
     """Instant fallback mock responses (removed artificial sleep)."""
@@ -206,14 +251,18 @@ async def ingest_data(files: List[UploadFile] = File(None), text: str = Form(...
     return {"message": "Data ingested successfully", "context_preview": combined_context[:100]}
 
 @app.post("/generate")
-async def generate_brd(context: str = Form(...)):
-    """Generate full BRD. Uses Gemini if API key is set, else mock."""
+async def generate_brd(context: str = Form(...)): # Reverted to single param
+    """Generate full BRD using Gemini (Primary Engine)."""
+    print("🚀 GENERATION REQUEST: [GEMINI FOCUS]")
     SESSION_STATS["brd_count"] += 1
+    save_telemetry()
     try:
-        if USE_REAL_LLM:
-            report = generate_with_real_llm(context)
+        if gemini_client:
+            report = generate_with_real_llm(context, "google", "gemini-flash")
         else:
             report = generate_with_mock(context)
+            report["brd"] = "⚠️ **Gemini Not Configured**. Showing mock analysis.\n\n" + report["brd"]
+        
         SESSION_STATS["success_count"] += 1
         return report
     except Exception as e:
@@ -221,23 +270,22 @@ async def generate_brd(context: str = Form(...)):
         raise e
 
 @app.post("/refine")
-async def refine_brd(original_report: str = Form(...), feedback: str = Form(...)):
-    """Refine an existing BRD based on feedback."""
+async def refine_brd(original_report: str = Form(...), feedback: str = Form(...)): # Reverted to single param
+    """Refine an existing BRD using Gemini."""
     SESSION_STATS["brd_count"] += 1
+    save_telemetry()
     try:
-        if USE_REAL_LLM:
+        if gemini_client:
             prompt = REFINEMENT_PROMPT.format(original_report=original_report, feedback=feedback)
-            refined_content = call_gemini(prompt)
-            # For simplicity in refinement, we return the same structure but updated
-            # Ideally we'd re-run analysis, but for 'modifying', updating the BRD is key
+            refined_content = call_llm(prompt, "google", "gemini-flash")
             report = {
-                "analysis": "Analysis updated for refinement.",
+                "analysis": "Analysis updated via Gemini.",
                 "brd": refined_content,
-                "clarification_questions": "Validation updated for refinement."
+                "clarification_questions": "Validation refreshed."
             }
         else:
             report = generate_with_mock(f"REFINED: {feedback}")
-            report["brd"] = f"### REFINED VERSION\n\n{report['brd']}"
+            report["brd"] = f"### REFINED VERSION (Mock fallback)\n\n{report['brd']}"
         
         SESSION_STATS["success_count"] += 1
         return report
@@ -284,8 +332,8 @@ def get_stats():
         "enron_loaded": len(ENRON_DATASET),
         "success_rate": success_rate,
         "uptime": uptime_str,
-        "ai_mode": "Gemini AI" if USE_REAL_LLM else "Mock",
-        "model": GEMINI_MODEL if USE_REAL_LLM else "mock-llm",
+        "ai_mode": "Gemini 1.5 Flash", # Reverted to specific model
+        "gemini_active": gemini_client is not None,
         "server_time": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
     }
 

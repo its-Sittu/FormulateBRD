@@ -76,9 +76,9 @@ const PlatformStatus = ({ stats }) => (
     
     <div style={{padding:'16px', background:'var(--bg-hover)', border:'1px solid var(--border-color)', borderRadius:'var(--radius-md)', marginBottom:'20px'}}>
       <div style={{display:'flex', alignItems:'center', gap:'10px', marginBottom:'12px'}}>
-        <div style={{width:'8px', height:'8px', borderRadius:'50%', background: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b'}}></div>
-        <span style={{fontSize:'13px', fontWeight:'700'}}>{stats ? stats.model : 'Awaiting Connection...'}</span>
-        <span style={{marginLeft:'auto', fontSize:'10px', fontWeight:'700', color: stats?.ai_mode === 'Gemini AI' ? '#10b981' : '#f59e0b', padding:'2px 6px', background:'rgba(16,185,129,0.1)', borderRadius:'4px'}}>{stats?.ai_mode === 'Gemini AI' ? 'LIVE' : 'MOCK'}</span>
+        <div style={{width:'8px', height:'8px', borderRadius:'50%', background: (stats?.gemini_active || stats?.openai_active || stats?.claude_active) ? '#10b981' : '#f59e0b'}}></div>
+        <span style={{fontSize:'13px', fontWeight:'700'}}>{stats ? stats.ai_mode : 'Awaiting Connection...'}</span>
+        <span style={{marginLeft:'auto', fontSize:'10px', fontWeight:'700', color: (stats?.gemini_active || stats?.openai_active || stats?.claude_active) ? '#10b981' : '#f59e0b', padding:'2px 6px', background:'rgba(16,185,129,0.1)', borderRadius:'4px'}}>{(stats?.gemini_active || stats?.openai_active || stats?.claude_active) ? 'LIVE' : 'MOCK'}</span>
       </div>
       <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
         <div style={{display:'flex', justifyContent:'space-between', fontSize:'12px'}}>
@@ -98,6 +98,9 @@ const PlatformStatus = ({ stats }) => (
       </div>
       <div style={{display:'flex', flexDirection:'column', gap:'6px', fontFamily:'monospace', fontSize:'11px'}}>
         <div style={{color:'var(--text-muted)'}}><span style={{color:'var(--accent-blue)'}}>[{new Date().toLocaleTimeString()}]</span> Engine ready...</div>
+        <div style={{color:'var(--text-muted)', fontSize:'10px', marginTop:'4px'}}>
+           MODELLING ENGINE: {stats?.gemini_active ? '✅ Gemini 1.5 Flash' : '❌ Offline (Mock Active)'}
+        </div>
         {stats?.brd_count > 0 && (
           <div style={{color:'var(--text-secondary)'}}><span style={{color:'var(--accent-blue)'}}>[{new Date().toLocaleTimeString()}]</span> Successfully delivered BRD-{(stats.brd_count).toString().padStart(3,'0')}</div>
         )}
@@ -534,10 +537,13 @@ function App() {
     localStorage.setItem('user_org', user.org)
   }, [user])
 
+
+
   useEffect(() => {
     document.documentElement.classList.toggle('light', theme === 'light')
     localStorage.setItem('theme', theme)
   }, [theme])
+
 
   const fetchStats = useCallback(async () => {
     try {
