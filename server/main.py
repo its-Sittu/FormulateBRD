@@ -2,10 +2,13 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from typing import List
 import os, time
 from datetime import datetime
 from dotenv import load_dotenv
+import traceback
 
 # Load .env from same directory as this file (robust across reloads)
 _env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
@@ -14,6 +17,15 @@ load_dotenv(dotenv_path=_env_path, override=True)
 from prompts import ANALYSIS_SYSTEM_PROMPT, BRD_GENERATION_PROMPT, GAP_ANALYSIS_PROMPT, REFINEMENT_PROMPT
 
 app = FastAPI()
+
+# --- Global Exception Handlers ---
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    """Catch all unhandled exceptions and return 500 with details"""
+    error_msg = f"{type(exc).__name__}: {str(exc)}"
+    error_trace = traceback.format_exc()
+    print(f"🔴 UNHANDLED ERROR: {error_msg}\n{error_trace}")
+    return {"error": "Internal Server Error", "detail": error_msg}
 
 # --- Provider Setup ---
 # Gemini
@@ -108,11 +120,25 @@ origins = [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:3000",
+    "http://localhost:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",
 ]
+
 # Add production client URL if set
 _client_url = os.getenv("CLIENT_URL")
 if _client_url:
     origins.append(_client_url)
+
+# For port forwarding scenarios: allow from env variable or enable all origins in dev
+_allow_all_origins = os.getenv("CORS_ALLOW_ALL", "false").lower() == "true"
+if _allow_all_origins:
+    print("⚠️  CORS_ALLOW_ALL enabled - allowing requests from all origins")
+    origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -267,7 +293,14 @@ async def generate_brd(context: str = Form(...)): # Reverted to single param
         return report
     except Exception as e:
         SESSION_STATS["error_count"] += 1
-        raise e
+        error_msg = str(e)
+        print(f"❌ Generation Error: {error_msg}")
+        # Return graceful error response instead of raising
+        return {
+            "analysis": "Error during analysis phase",
+            "brd": f"## ❌ Generation Failed\n\nError: {error_msg[:500]}",
+            "clarification_questions": "Please retry or check server logs for details."
+        }
 
 @app.post("/refine")
 async def refine_brd(original_report: str = Form(...), feedback: str = Form(...)): # Reverted to single param
@@ -291,7 +324,14 @@ async def refine_brd(original_report: str = Form(...), feedback: str = Form(...)
         return report
     except Exception as e:
         SESSION_STATS["error_count"] += 1
-        raise e
+        error_msg = str(e)
+        print(f"❌ Refinement Error: {error_msg}")
+        # Return graceful error response instead of raising
+        return {
+            "analysis": "Error during refinement",
+            "brd": f"## ❌ Refinement Failed\n\nError: {error_msg[:500]}",
+            "clarification_questions": "Please retry or check server logs for details."
+        }
 
 @app.get("/enron/random")
 async def get_random_enron_email():
@@ -332,7 +372,7 @@ def get_stats():
         "enron_loaded": len(ENRON_DATASET),
         "success_rate": success_rate,
         "uptime": uptime_str,
-        "ai_mode": "Gemini 1.5 Flash", # Reverted to specific model
+        "ai_mode": "Advanced AI Product Architect",
         "gemini_active": gemini_client is not None,
         "server_time": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
     }

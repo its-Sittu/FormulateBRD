@@ -1,86 +1,64 @@
-# FormulateBRD — The Agentic Business Analyst
+# FormulateBRD — The Advanced AI Product Architect
 
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?style=flat&logo=react)](https://reactjs.org/)
 [![Gemini](https://img.shields.io/badge/AI-Gemini_Flash-4285F4?style=flat&logo=google-gemini)](https://deepmind.google/technologies/gemini/)
 [![Vite](https://img.shields.io/badge/Build-Vite-646CFF?style=flat&logo=vite)](https://vitejs.dev/)
 
-**FormulateBRD** is an AI-powered pipeline designed to bridge the gap between unstructured business communication and structured software requirements. It automates the extraction and formalization of business needs into enterprise-ready **Business Requirements Documents (BRDs)**, reducing ambiguity and accelerating project kick-off.
+**FormulateBRD** is an elite AI-powered orchestration engine designed to transform unstructured business intuition into high-fidelity, strategically-aligned **Architectural Blueprints**. It bridges the massive gap between "I have an idea" and "Here is the technical and business roadmap."
 
 ---
 
-## 🧠 The Agentic Pipeline
+## 🏛️ How It Works: Basic to Advanced
 
-FormulateBRD operates on a strict **3-stage analytical workflow** to ensure high-fidelity outputs over creative assumptions.
+### 🔹 The Basic Layer: The Full-Stack Bridge
+At its core, FormulateBRD is a modern web application consisting of two primary halves:
+- **The Intelligence Core (Backend)**: A high-performance **FastAPI** (Python) server that manages LLM orchestration, session telemetry, and the **Enron Email Dataset** integration.
+- **The Tactical Console (Frontend)**: A sleek, high-density **React + Vite** dashboard. It uses a custom design system built with vanilla CSS to provide real-time feedback and high-fidelity markdown rendering.
 
-1. **Requirement Analysis**: The system deconstructs raw input (emails, chats, notes) into factual nodes—Business Problems, Objectives, Stakeholders, and Explicit Requirements—without making guesses.
-2. **BRD Generation**: Analysis data is transformed into a formal document using standardized enterprise headers, ensuring consistent formatting and professional language.
-3. **Validation & Clarification**: The final stage performs a gap analysis, identifying ambiguities or missing metrics and generating a list of actionable "Clarification Questions" for stakeholders.
+### 🔹 The Intermediate Layer: Context Ingestion
+Unlike standard AI tools, FormulateBRD is built for **Deep Context Ingestion**. It doesn't just read text; it classifies it:
+- **Input Detection**: The system identifies whether you've provided a *Raw Idea*, an *Email thread*, a *Website description*, or a *Chat log*.
+- **Signal-to-Noise Filtering**: Using complex prompt engineering, it strips away business jargon to find the "Truth Nodes" — the core business problems and stakeholder needs.
 
----
+### 🔹 The Advanced Layer: The Agentic Architect Pipeline
+This is where the "Why" meets the "How." The system executes a strict **3-Stage Architectural Workflow**:
 
-## ✨ Key Features
+#### 1. Analysis & Business Intent (The Strategist)
+Instead of jumping to requirements, the engine first analyzes the **Business Intent**. It asks: *Why builds this? Who loses if we don't?* It then suggests innovative features like Zero-Knowledge Proofs or Edge Computing that the user might not have even considered.
 
-- **📊 Operational Dashboard**: Real-time telemetry monitoring generation velocity, AI engine status, and session metrics.
-- **📧 Business Simulation**: Integrated with the **Enron Email Dataset** to allow instant testing and demonstration using real-world enterprise communication.
-- **🌓 Enterprise UI**: High-density interface with support for **Dark/Light modes**, built using the Inter and Outfit typography systems.
-- **📄 Markdown First**: All requirements are generated and rendered in standard Markdown, ready for export or integration into tools like Jira and Confluence.
+#### 2. Architectural BRD Generation (The Builder)
+The signal from Stage 1 is transformed into a structured, investor-ready **Business Requirements Document**. It produces categorized functional needs, measurable KPIs, and a deep Stakeholder Matrix. This stage is "hallucination-guarded" — it focuses on logical architecture over creative fluff.
 
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Python 3.10+** (Backend)
-- **Node.js 18+** & **npm** (Frontend)
-- **Gemini API Key** (Optional, falls back to Mock mode)
-
-### 1. Backend Setup (Server)
-
-```bash
-cd server
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure Environment
-echo "GEMINI_API_KEY=your_key_here" > .env
-
-# Start FastAPI server
-python -m uvicorn main:app --reload --port 8000
-```
-
-### 2. Frontend Setup (Client)
-
-```bash
-cd client
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-*Access the dashboard at `http://localhost:5173`.*
+#### 3. Strategic Validation (The Critic)
+The final stage performs a gap analysis on its own output. It identifies ambiguities and generates **Strategic Questions** that force stakeholders to think deeper about their implementation risks.
 
 ---
 
-## 📦 Project Architecture
+## 🛠️ Technical Deep Dive
 
-```text
-├── client/          # React + Vite (Dashboard UI & Markdown Rendering)
-├── server/          # Python FastAPI (Agentic Pipeline & Enron Logic)
-├── dataset/         # Local Data (Enron Email Sample)
-└── README.md        # Documentation
-```
+### Why FastAPI & Python?
+- **Speed**: FastAPI's asynchronous nature allows for multiple LLM calls without blocking the server.
+- **AI Ecosystem**: Python provides first-class support for the `google-genai` SDK and data processing libraries like `pandas` (used for the Enron loader).
+
+### Why React & Vite?
+- **Vite's HMR**: Development is nearly instantaneous.
+- **Micro-Animations**: The UI uses custom CSS transitions to provide an "active" feel (e.g., the telemetry pulses).
+- **Markdown Purity**: We use `react-markdown` to ensure that what the AI generates is rendered exactly as intended, maintaining clear hierarchy.
 
 ---
 
-## 👥 The Team
+## 🚀 Architectural Data Flow
+
+1.  **Ingestion**: User pastes context into the `GeneratorView`.
+2.  **Orchestration**: `main.py` triggers the `MASTER_PIPELINE_PROMPT`.
+3.  **Transformation**: **Gemini 1.5 Flash** processes the text via a 3-stage chain-of-thought prompt.
+4.  **Telemetry**: Every request is logged in `telemetry.json` and served back to the Dashboard's **AI Engine Telemetry** card.
+5.  **Refinement**: If the user provides feedback, the `REFINEMENT_PROMPT` takes the *original BRD + feedback* to create a delta-refinement, preserving the original context.
+
+---
+
+## 👥 The Architectural Team
 
 - **Satyam Raghuvanshi**: Backend & AI Integration Lead
 - **Saksham Jaiswal**: UX & Product Delivery Lead
@@ -89,6 +67,16 @@ npm run dev
 
 ---
 
-## 📜 License
+## 📜 Getting Started
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Check the internal documentation in the `server/` and `client/` directories for specific setup instructions.
+
+```text
+├── client/          # React tactical console
+├── server/          # FastAPI intelligence core
+├── dataset/         # Historical business communication data
+└── README.md        # This document
+```
+
+---
+*Generated by the Advanced AI Product Architect on behalf of the FormulateBRD team.*

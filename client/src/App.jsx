@@ -256,12 +256,12 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
 
   return (
     <div className="dashboard-view">
-      <div className="dashboard-title">BRD Drafting Workspace</div>
+      <div className="dashboard-title">Advanced Architecture Workspace</div>
       <div className="generator-view">
          <div className="gen-panel-left">
             <div style={{marginBottom:'16px'}}>
-              <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'4px'}}>Requirements Input</h3>
-              <p style={{fontSize:'12px', color:'var(--text-muted)'}}>Provide business context or load sample data.</p>
+              <h3 style={{fontSize:'14px', fontWeight:'700', marginBottom:'4px'}}>Product Context & Logic Ingestion</h3>
+              <p style={{fontSize:'12px', color:'var(--text-muted)'}}>Input raw ideas, emails, web descriptions, or chat logs.</p>
             </div>
             <div style={{display:'flex', gap:'8px', marginBottom:'12px'}}>
                <button onClick={() => setInputText('')} className="icon-btn" title="Clear Canvas"><Trash2 size={14} /></button>
@@ -278,7 +278,7 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
             </div>
             <textarea 
               style={{flex:1, background:'var(--bg-input)', border:'1px solid var(--border-color)', color:'var(--text-primary)', padding:'20px', borderRadius:'8px', resize:'none', fontFamily:'inherit', fontSize:'16px'}}
-              placeholder="e.g. User needs a multi-tenant SaaS portal with RBAC..."
+              placeholder="e.g. Vision for a multi-tenant AI governance platform with RBAC and real-time auditing..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
             />
@@ -287,7 +287,7 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
               disabled={isLoading || !inputText}
               style={{marginTop:'16px', padding:'12px', background:'var(--primary)', border:'none', borderRadius:'6px', color:'white', fontWeight:'600', cursor:'pointer'}}
             >
-              {isLoading ? 'Processing LLM Pipeline...' : 'Generate Requirements Blueprint'}
+              {isLoading ? 'Architecting Solutions...' : 'Generate Architectural Blueprint'}
             </button>
          </div>
          <div className="gen-panel-right">
@@ -303,7 +303,7 @@ const GeneratorView = ({ externalInput, initialReport, onSave }) => {
                   <ReactMarkdown>{activeTab === 'analysis' ? report.analysis : (activeTab === 'brd' ? report.brd : report.clarification_questions)}</ReactMarkdown>
                 </div>
                 <div style={{marginTop:'20px', paddingTop:'16px', borderTop:'1px solid var(--border-color)'}}>
-                   <div style={{fontSize:'12px', fontWeight:'700', marginBottom:'8px', color:'var(--primary)'}}>REFINEMENT CANVAS — PROVIDE FEEDBACK TO ALTER BRD</div>
+                   <div style={{fontSize:'12px', fontWeight:'700', marginBottom:'8px', color:'var(--primary)'}}>ARCHITECTURAL REFINEMENT — ITERATE ON BLUEPRINT</div>
                    <div style={{display:'flex', gap:'10px'}}>
                       <input 
                         style={{flex:1, background:'var(--bg-input)', border:'1px solid var(--border-color)', color:'var(--text-primary)', padding:'10px', borderRadius:'6px', fontSize:'13px'}}
