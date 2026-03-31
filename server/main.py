@@ -31,10 +31,22 @@ async def global_exception_handler(request, exc):
 # Gemini
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 gemini_client = None
-if GEMINI_API_KEY and GEMINI_API_KEY != "your_gemini_api_key_here":
-    from google import genai
-    gemini_client = genai.Client(api_key=GEMINI_API_KEY)
-    print(f"✅ Gemini AI configured with key: {GEMINI_API_KEY[:10]}...")
+
+def init_gemini():
+    global gemini_client
+    if GEMINI_API_KEY and GEMINI_API_KEY != "your_gemini_api_key_here":
+        try:
+            from google import genai
+            gemini_client = genai.Client(api_key=GEMINI_API_KEY)
+            print(f"✅ Gemini AI configured with key: {GEMINI_API_KEY[:10]}...")
+            return True
+        except Exception as e:
+            print(f"❌ Failed to initialize Gemini Client: {e}")
+            return False
+    return False
+
+# Initialize at startup
+init_gemini()
 
 @app.get("/debug")
 async def debug_info():
